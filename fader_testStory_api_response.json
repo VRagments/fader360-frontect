@@ -1,25 +1,25 @@
 {
     "visibility": "discoverable",
     "user_display_name": "jensVragDisplayName",
-    "updated_at": "2023-01-25 12:51:41",
+    "updated_at": "2023-01-25 13:43:51",
     "thumbnail_image": "https://app.getfader.com/assets/081bb9b0-3789-4ad2-ad20-e40bd71722de/thumb_mediaverse_logo_simplified.png.png",
     "squared_image": "https://app.getfader.com/assets/081bb9b0-3789-4ad2-ad20-e40bd71722de/squared_mediaverse_logo_simplified.png.png",
     "primary_asset_lease_id": "4036cfbd-2e8c-48af-9f17-02dfacd94f39",
     "preview_image": "https://app.getfader.com/assets/081bb9b0-3789-4ad2-ad20-e40bd71722de/preview_mediaverse_logo_simplified.png.png",
     "name": "TestStory",
-    "last_updated_at": "2023-01-25 12:51:41",
+    "last_updated_at": "2023-01-25 13:43:51",
     "id": "08662a0b-b34c-4122-810d-b08bf6ab8f1a",
     "data": {
         "version": 1.4,
         "uploadedAssetIds": [
-            "0f6cfebf-3adf-461e-a29d-0ad74237f667",
-            "4afe562b-ae64-4efe-afa4-8121ff0748f9",
-            "75422ede-3191-42c7-aa0a-0b91f28c5f85",
-            "1240225a-803e-4e3d-a0e3-402f5999394c",
-            "4036cfbd-2e8c-48af-9f17-02dfacd94f39",
-            "058fa6db-3757-4689-9bcb-8f8f2de14485",
-            "b7f1b772-da00-46b3-b364-4be35727a25b",
-            "d63fe534-c998-4293-993c-011afa174127",
+            "0f6cfebf-3adf-461e-a29d-0ad74237f667", // "asset-interactive.png"
+            "4afe562b-ae64-4efe-afa4-8121ff0748f9", // "TecnoCampusOutside.jpg"
+            "75422ede-3191-42c7-aa0a-0b91f28c5f85", // "palanca.jpg"
+            "1240225a-803e-4e3d-a0e3-402f5999394c", // "Pesquera2.mp4"
+            "4036cfbd-2e8c-48af-9f17-02dfacd94f39", // "MEDIAVERSE LOGO SIMPLIFIED.png"
+            "058fa6db-3757-4689-9bcb-8f8f2de14485", // "Sala2_a_cuina.mp4"
+            "b7f1b772-da00-46b3-b364-4be35727a25b", // "Estadio Florencio Sola.png"
+            "d63fe534-c998-4293-993c-011afa174127", // "ocells riudellots.WAV"
             "093054be-dee1-4a05-85c0-4ac9fe4b9dbb"
         ],
         "ui": {
@@ -30,14 +30,15 @@
             "nextTutorialStep": -1
         },
         "scenes": {
+            // Szene1 (Env)
             "f8c06cac-c7f2-452d-86e8-8228cc95f52b": {
                 "ui": {
                     "selectedAssetIdByGroup": {
-                        "Video2D": "16c064bc-3ea7-509b-8816-41784436cabe",
+                        "Video2D": "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751",
                         "Interactive": "182a5c28-0f2f-5eeb-b536-70d407e4821d",
                         "Image2D": "56294545-b679-5719-ac94-b31cb30f2705"
                     },
-                    "selectedAssetGroup": "Interactive"
+                    "selectedAssetGroup": "Video2D"
                 },
                 "primary_asset_id": "058fa6db-3757-4689-9bcb-8f8f2de14485",
                 "name": "Szene1 (Env)",
@@ -52,7 +53,7 @@
                 "duration": 12000,
                 "assetOrderByGroup": {
                     "Video2D": [
-                        "16c064bc-3ea7-509b-8816-41784436cabe"
+                        "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751"
                     ],
                     "Interactive": [
                         "182a5c28-0f2f-5eeb-b536-70d407e4821d"
@@ -65,10 +66,11 @@
                 "assetIds": [
                     "a44a7779-9db6-5ac7-8983-97aae1304785",
                     "56294545-b679-5719-ac94-b31cb30f2705",
-                    "16c064bc-3ea7-509b-8816-41784436cabe",
-                    "182a5c28-0f2f-5eeb-b536-70d407e4821d"
+                    "182a5c28-0f2f-5eeb-b536-70d407e4821d",
+                    "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751"
                 ]
             },
+            // Szene3 (360 vid, jump disallowed)
             "b5fb8ff8-225b-4ac9-a8db-9b813dd96ced": {
                 "ui": {
                     "selectedAssetIdByGroup": {
@@ -96,6 +98,7 @@
                     "a4fb7708-627e-5d40-b52a-720e16372a51"
                 ]
             },
+            // Szene2 (360)
             "9c973c3a-319c-4e55-abab-59b2f9b840d3": {
                 "ui": {
                     "selectedAssetIdByGroup": {
@@ -151,7 +154,53 @@
             "9c973c3a-319c-4e55-abab-59b2f9b840d3", // Szene2 (360)
             "b5fb8ff8-225b-4ac9-a8db-9b813dd96ced" // Szene3 (360 vid, jump disallowed)
         ],
+        // Assets attached to the Scene(s), I figure
         "assets": {
+            // Retrieved via /api/projects/:project_id/assets/:id
+            // Live: https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/058fa6db-3757-4689-9bcb-8f8f2de14485
+            // "Sala2_a_cuina.mp4"
+            // Note: :id in this case refers to "backendId" !
+            "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751": {
+                "type": "Video",
+                "properties": {
+                    "scaleZ": 1,
+                    "scaleY": 1,
+                    "scaleX": 1,
+                    "scale": 1,
+                    "rotationZ": -4,
+                    "rotationY": -106.5,
+                    "rotationX": 12.5,
+                    "positionZ": -14,
+                    "positionY": 0,
+                    "positionX": 0
+                },
+                "id": "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751",
+                "group": "Video2D",
+                "display": {
+                    "showInteractive": false,
+                    "linkedBackendIds": [],
+                    "caption": ""
+                },
+                "data": {
+                    "textColor": "#ffffff",
+                    "nextSceneId": "",
+                    "legacyInteractiveSize": true,
+                    "headline": "",
+                    "frameOpacity": 1,
+                    "frameOn": false,
+                    "frameColor": "#ffffff",
+                    "cardWidth": 10,
+                    "cardLevel": 1,
+                    "cardHeight": 10,
+                    "body": "",
+                    "backgroundOpacity": 1,
+                    "backgroundOn": false,
+                    "backgroundColor": "#000000"
+                },
+                "backendId": "058fa6db-3757-4689-9bcb-8f8f2de14485"
+            },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/1240225a-803e-4e3d-a0e3-402f5999394c
+            // "Pesquera2.mp4"
             "a4fb7708-627e-5d40-b52a-720e16372a51": {
                 "type": "Video",
                 "properties": {
@@ -191,6 +240,8 @@
                 },
                 "backendId": "1240225a-803e-4e3d-a0e3-402f5999394c"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/0f6cfebf-3adf-461e-a29d-0ad74237f667
+            // "asset-interactive.png"
             "a44a7779-9db6-5ac7-8983-97aae1304785": {
                 "type": "Image",
                 "properties": {
@@ -230,6 +281,8 @@
                 },
                 "backendId": "0f6cfebf-3adf-461e-a29d-0ad74237f667"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/d63fe534-c998-4293-993c-011afa174127
+            // "ocells riudellots.WAV"
             "a09401f7-4bd5-540a-8d47-eced9de2abb3": {
                 "type": "Audio",
                 "properties": {
@@ -273,6 +326,9 @@
                 },
                 "backendId": "d63fe534-c998-4293-993c-011afa174127"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/058fa6db-3757-4689-9bcb-8f8f2de14485
+            // "Sala2_a_cuina.mp4"
+            // This one is a duplicate with different data{} values?
             "78c59bb2-5692-5a99-b4e9-f6f099ec3e3e": {
                 "type": "Video",
                 "properties": {
@@ -312,6 +368,8 @@
                 },
                 "backendId": "058fa6db-3757-4689-9bcb-8f8f2de14485"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/093054be-dee1-4a05-85c0-4ac9fe4b9dbb
+            // "cc logo.png"
             "632ea22a-2a1a-58ae-a9de-3fad11bcc3fb": {
                 "type": "Image",
                 "properties": {
@@ -351,6 +409,8 @@
                 },
                 "backendId": "093054be-dee1-4a05-85c0-4ac9fe4b9dbb"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/75422ede-3191-42c7-aa0a-0b91f28c5f85
+            // "palanca.jpg"
             "56294545-b679-5719-ac94-b31cb30f2705": {
                 "type": "Image",
                 "properties": {
@@ -390,6 +450,8 @@
                 },
                 "backendId": "75422ede-3191-42c7-aa0a-0b91f28c5f85"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/4afe562b-ae64-4efe-afa4-8121ff0748f9
+            // "TecnoCampusOutside.jpg"
             "225ac798-1925-5ea3-829f-71a96105b5dc": {
                 "type": "Image",
                 "properties": {
@@ -429,6 +491,7 @@
                 },
                 "backendId": "4afe562b-ae64-4efe-afa4-8121ff0748f9"
             },
+            // TextCard has no backendId
             "20657c4f-01f7-5048-8f47-652763f60bd6": {
                 "type": "TextCard",
                 "properties": {
@@ -468,6 +531,8 @@
                 },
                 "backendId": ""
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/4036cfbd-2e8c-48af-9f17-02dfacd94f39
+            // "MEDIAVERSE LOGO SIMPLIFIED.png"
             "182a5c28-0f2f-5eeb-b536-70d407e4821d": {
                 "type": "Image",
                 "properties": {
@@ -506,48 +571,12 @@
                     "backgroundColor": "#000000"
                 },
                 "backendId": "4036cfbd-2e8c-48af-9f17-02dfacd94f39"
-            },
-            "16c064bc-3ea7-509b-8816-41784436cabe": {
-                "type": "Video",
-                "properties": {
-                    "scaleZ": 1,
-                    "scaleY": 1,
-                    "scaleX": 1,
-                    "scale": 1,
-                    "rotationZ": -4,
-                    "rotationY": -106.5,
-                    "rotationX": 12.5,
-                    "positionZ": -14,
-                    "positionY": 0,
-                    "positionX": 0
-                },
-                "id": "16c064bc-3ea7-509b-8816-41784436cabe",
-                "group": "Video2D",
-                "display": {
-                    "showInteractive": false,
-                    "linkedBackendIds": [],
-                    "caption": ""
-                },
-                "data": {
-                    "textColor": "#ffffff",
-                    "nextSceneId": "",
-                    "legacyInteractiveSize": true,
-                    "headline": "",
-                    "frameOpacity": 1,
-                    "frameOn": false,
-                    "frameColor": "#ffffff",
-                    "cardWidth": 10,
-                    "cardLevel": 1,
-                    "cardHeight": 10,
-                    "body": "",
-                    "backgroundOpacity": 1,
-                    "backgroundOn": false,
-                    "backgroundColor": "#000000"
-                },
-                "backendId": "058fa6db-3757-4689-9bcb-8f8f2de14485"
             }
         },
+        // List of unique elements, no duplicates. Blueprints mean..? Not global I'm sure
         "assetBlueprints": {
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/d63fe534-c998-4293-993c-011afa174127
+            // "ocells riudellots.WAV"
             "d63fe534-c998-4293-993c-011afa174127": {
                 "type": "Audio",
                 "id": "d63fe534-c998-4293-993c-011afa174127",
@@ -557,6 +586,8 @@
                 },
                 "backendId": "d63fe534-c998-4293-993c-011afa174127"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/b7f1b772-da00-46b3-b364-4be35727a25b
+            // "Estadio Florencio Sola.png"
             "b7f1b772-da00-46b3-b364-4be35727a25b": {
                 "type": "Image",
                 "id": "b7f1b772-da00-46b3-b364-4be35727a25b",
@@ -566,6 +597,8 @@
                 },
                 "backendId": "b7f1b772-da00-46b3-b364-4be35727a25b"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/75422ede-3191-42c7-aa0a-0b91f28c5f85
+            // "palanca.jpg"
             "75422ede-3191-42c7-aa0a-0b91f28c5f85": {
                 "type": "Image",
                 "id": "75422ede-3191-42c7-aa0a-0b91f28c5f85",
@@ -575,6 +608,8 @@
                 },
                 "backendId": "75422ede-3191-42c7-aa0a-0b91f28c5f85"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/4afe562b-ae64-4efe-afa4-8121ff0748f9
+            // "TecnoCampusOutside.jpg"
             "4afe562b-ae64-4efe-afa4-8121ff0748f9": {
                 "type": "Image",
                 "id": "4afe562b-ae64-4efe-afa4-8121ff0748f9",
@@ -584,6 +619,8 @@
                 },
                 "backendId": "4afe562b-ae64-4efe-afa4-8121ff0748f9"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/4036cfbd-2e8c-48af-9f17-02dfacd94f39
+            // "MEDIAVERSE LOGO SIMPLIFIED.png"
             "4036cfbd-2e8c-48af-9f17-02dfacd94f39": {
                 "type": "Image",
                 "id": "4036cfbd-2e8c-48af-9f17-02dfacd94f39",
@@ -593,6 +630,8 @@
                 },
                 "backendId": "4036cfbd-2e8c-48af-9f17-02dfacd94f39"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/1240225a-803e-4e3d-a0e3-402f5999394c
+            // "Pesquera2.mp4"
             "1240225a-803e-4e3d-a0e3-402f5999394c": {
                 "type": "Video",
                 "id": "1240225a-803e-4e3d-a0e3-402f5999394c",
@@ -602,6 +641,8 @@
                 },
                 "backendId": "1240225a-803e-4e3d-a0e3-402f5999394c"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/0f6cfebf-3adf-461e-a29d-0ad74237f667
+            // "asset-interactive.png"
             "0f6cfebf-3adf-461e-a29d-0ad74237f667": {
                 "type": "Image",
                 "id": "0f6cfebf-3adf-461e-a29d-0ad74237f667",
@@ -611,6 +652,7 @@
                 },
                 "backendId": "0f6cfebf-3adf-461e-a29d-0ad74237f667"
             },
+            // This TextCard is seemingly not linked to any scene??
             "0dee4097-7abe-553f-bd0d-25dc7674baec": {
                 "type": "TextCard",
                 "id": "0dee4097-7abe-553f-bd0d-25dc7674baec",
@@ -620,6 +662,8 @@
                 },
                 "backendId": ""
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/093054be-dee1-4a05-85c0-4ac9fe4b9dbb
+            // "cc logo.png"
             "093054be-dee1-4a05-85c0-4ac9fe4b9dbb": {
                 "type": "Image",
                 "id": "093054be-dee1-4a05-85c0-4ac9fe4b9dbb",
@@ -629,6 +673,8 @@
                 },
                 "backendId": "093054be-dee1-4a05-85c0-4ac9fe4b9dbb"
             },
+            // https://app-api.getfader.com/api/public/projects/08662a0b-b34c-4122-810d-b08bf6ab8f1a/assets/058fa6db-3757-4689-9bcb-8f8f2de14485
+            // "Sala2_a_cuina.mp4"
             "058fa6db-3757-4689-9bcb-8f8f2de14485": {
                 "type": "Video",
                 "id": "058fa6db-3757-4689-9bcb-8f8f2de14485",
