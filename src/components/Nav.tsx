@@ -1,11 +1,10 @@
 const Nav = () => {
     return (
-        <nav className='mx-auto flex w-full bg-gray-500 py-2 px-6'>
-            <h1>LINKS:</h1>
-            <a className='pl-6' href='/'>
+        <nav className='mx-auto flex w-full justify-center bg-gray-300 shadow-md'>
+            <a className='mx-1 w-16 bg-blue-100 p-2 text-center hover:bg-blue-300' href='edit'>
                 3D
             </a>
-            <a className='pl-6' href='/page'>
+            <a className='mx-1 w-16 bg-blue-100 p-2 text-center hover:bg-blue-300' href='page'>
                 Page
             </a>
         </nav>

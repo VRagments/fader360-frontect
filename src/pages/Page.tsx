@@ -1,11 +1,9 @@
-import Nav from '../components/Nav';
 import logo from '../logo.svg';
 import '../style/App.css';
 
-function Page() {
+const Page = () => {
     return (
         <div>
-            <Nav />
             <main className='flex h-full flex-col items-center justify-center bg-slate-800'>
                 <header>
                     <p className='text-2xl font-extrabold text-white'>
@@ -19,6 +17,6 @@ function Page() {
             </main>
         </div>
     );
-}
+};
 
 export default Page;

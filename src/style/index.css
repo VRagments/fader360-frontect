@@ -9,3 +9,8 @@ body {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+/* Yeah yeah, I know: https://tailwindcss.com/docs/reusing-styles#avoiding-premature-abstraction */
+.fader-3d-card {
+    @apply flex flex-col content-center items-center rounded-md bg-slate-400 p-2;
+}
