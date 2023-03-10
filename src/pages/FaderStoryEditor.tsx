@@ -1,17 +1,25 @@
 import { useState } from 'react';
-import THREEScene from '../components/THREEScene';
+import FaderStory from '../components/FaderStory';
 import { apiAuthTokenToStore, apiListAllProjects } from '../lib/axios';
 import useZustand from '../lib/zustand/zustand';
 import { useEffect } from 'react';
+import { Leva } from 'leva';
+import { useSearchParams } from 'react-router-dom';
+import buildConfig from '../buildConfig';
 
 const FaderStoryEditor = () => {
     const apiAuthToken = useZustand((state) => state.siteData.apiAuthToken);
     const currentFaderStory = useZustand((state) => state.project);
 
+    /* Debug mode active with a `?debug` url param */
+    const debug = buildConfig.dev.debugURLenabled ? (useSearchParams()[0].get('debug') === '' ? true : false) : false;
+
     const [sceneId, setSceneId] = useState<string>('');
 
     if (!apiAuthToken) {
-        apiAuthTokenToStore({ username: 'jensVrag', password: 'jVragments' }).catch((error: string) => error);
+        apiAuthTokenToStore({ username: buildConfig.login.username as string, password: buildConfig.login.password as string }).catch(
+            (error: string) => error
+        );
     }
 
     useEffect(() => {
@@ -22,7 +30,7 @@ const FaderStoryEditor = () => {
     }, [apiAuthToken]);
 
     if (!currentFaderStory) {
-        return null;
+        return <>Cannot load Story data!</>;
     }
 
     return (
@@ -31,19 +39,24 @@ const FaderStoryEditor = () => {
                 <div className='absolute top-0 z-10 m-2 rounded-md bg-slate-500 py-1 px-2 text-slate-200'>
                     <b>{currentFaderStory.name}</b> by <i>{currentFaderStory.user_display_name}</i>
                 </div>
-
-                <div className='relative h-[32rem] w-4/5 rounded-md border-2'>
-                    {sceneId ? (
-                        <THREEScene sceneId={sceneId} />
-                    ) : (
-                        <div className='h-full w-full'>
-                            {currentFaderStory.preview_image && (
-                                <img className='h-full w-full object-contain' src={currentFaderStory.preview_image} />
-                            )}
-                        </div>
-                    )}
+                <div className='relative flex h-[40rem] w-4/5 rounded-md border-2'>
+                    <div className='w-full'>
+                        {sceneId ? (
+                            <>
+                                <FaderStory sceneId={sceneId} debug={debug} />
+                            </>
+                        ) : (
+                            <div className='h-full w-full'>
+                                {currentFaderStory.preview_image && (
+                                    <img className='h-full w-full object-contain' src={currentFaderStory.preview_image} />
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className='absolute top-0 right-0 w-1/4 opacity-95'>
+                        <Leva titleBar={{ title: 'Title', drag: false }} fill flat />
+                    </div>
                 </div>
-
                 <div className='absolute bottom-0 z-10 m-2 rounded-md bg-slate-500 py-1 px-2 text-slate-200'>
                     Pick Scene:
                     <>

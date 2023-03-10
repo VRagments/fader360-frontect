@@ -1,3 +1,62 @@
+# Fader 360 (codependency with new_darth)
+
+## Running new_darth
+
+### Using docker:
+
+(Some of the following steps might be superfluous for non-WSL users)
+
+-   `sudo service postgresql start`
+-   `sudo dockerd` (1st shell used)
+-   `make clean`
+-   `make init-web-assets`
+-   `make docker-build`
+-   `make docker-refresh-db`
+-   `make docker-dev` (2nd shell used)
+-   `make proxy` (3d shell used)
+
+-   something something `nix-shell` (not sure were to use it and when not to)
+
+(In case builds are not taking file changes into account)
+
+-   `docker stop $(docker ps -aq) && docker builder prune -af && docker image prune -af && docker system prune -af` (https://stackoverflow.com/questions/35594987/how-to-force-docker-for-a-clean-build-of-an-image#comment113906016_45097423)
+-   or go nuclear: `docker system prune` (same link)
+-   then rebuild
+
+### Non-docker (not working, nginx?)
+
+-   ...
+
+<br/>
+
+## Running fader360
+
+-   `yarn install && yarn start`
+
+<br/>
+
+## Further Steps
+
+<br/>
+
+### new_darth:
+
+-   browse to `http://localhost:45020` (if proxy running) for new_darth's login page and so forth
+-   Register, add a project, add assets, etc
+
+<br/>
+
+### fader360
+
+-   edit `src/devConfig.json` to suit your own login/password data
+-   browse to `http://locahost:45020/editor` to reach fader360's editor
+
+<br/>
+<br/>
+<br/>
+
+### _Original README content from C-R-A:_
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

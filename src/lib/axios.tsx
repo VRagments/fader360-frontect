@@ -60,7 +60,7 @@ export const apiProjectToStore = async (project_id: string) => {
                         storeSetProject(combinedProject);
 
                         /** Converting from Array to Record<string, FaderBackendAsset> */
-                        const assets: ZustandState['faderStoryData']['currentAssets'] = {};
+                        const assets: ZustandState['faderStoryData']['backendAssets'] = {};
                         result.forEach((res) => {
                             assets[res.id] = res;
                         });

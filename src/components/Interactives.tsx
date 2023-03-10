@@ -1,7 +1,7 @@
-import { StoryAsset } from '../types/FaderTypes';
+import { FaderStoryAsset } from '../types/FaderTypes';
 
 type InteractivesProps = {
-    sceneInteractiveAssets: StoryAsset[];
+    sceneInteractiveAssets: FaderStoryAsset[];
 };
 const Interactives = (props: InteractivesProps) => {
     const interactiveAssets = props.sceneInteractiveAssets;

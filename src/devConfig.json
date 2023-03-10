@@ -1,0 +1,9 @@
+{
+    "login": {
+        "username": "jensVrag",
+        "password": "jVragments"
+    },
+    "dev": {
+        "debugURLenabled": true
+    }
+}

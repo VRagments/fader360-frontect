@@ -32,7 +32,7 @@ const useZustand = create<ZustandState>()(
                     },
                     storeSetProjectAssets: (assets) => {
                         set((draftState) => {
-                            draftState.faderStoryData.currentAssets = assets;
+                            draftState.faderStoryData.backendAssets = assets;
                         });
                     },
                 },
@@ -41,7 +41,7 @@ const useZustand = create<ZustandState>()(
                 },
                 project: undefined,
                 faderStoryData: {
-                    currentAssets: {},
+                    backendAssets: {},
                 },
             };
 

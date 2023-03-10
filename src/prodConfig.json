@@ -1,0 +1,9 @@
+{
+    "login": {
+        "username": "",
+        "password": ""
+    },
+    "dev": {
+        "debugURLenabled": false
+    }
+}

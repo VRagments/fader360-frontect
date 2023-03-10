@@ -1,5 +1,8 @@
-import { FaderBackendAsset, FaderStory } from '../types/FaderTypes';
+/* There is a bigger dump of an actual FaderStory (from live 'old' Fader) as .json in root folder */
+
+import { FaderBackendAsset, FaderStory, FaderStoryAsset } from '../types/FaderTypes';
 import { cloneDeep } from 'lodash';
+import { defaultAssetData, defaultAssetDisplay, defaultAssetProperties } from './emptyDefaults';
 
 const mockFaderStoryData: FaderStory['data'] = {
     version: 1.4,
@@ -8,14 +11,14 @@ const mockFaderStoryData: FaderStory['data'] = {
         userSelectedThumbnail: true,
         showSceneInfo: false,
         showEnvironmentInfo: false,
-        selectedSceneId: 'b5fb8ff8-225b-4ac9-a8db-9b813dd96ced',
+        selectedSceneId: 'f8c06cac-c7f2-452d-86e8-8228cc95f52b',
         nextTutorialStep: -1,
     },
     scenes: {
         'f8c06cac-c7f2-452d-86e8-8228cc95f52b': {
             ui: {
                 selectedAssetIdByGroup: {},
-                selectedAssetGroup: 'Video2D',
+                selectedAssetGroup: '360',
             },
             primary_asset_id: '',
             name: 'Scene1 (360 Image)',
@@ -30,16 +33,14 @@ const mockFaderStoryData: FaderStory['data'] = {
             duration: 12000,
             assetOrderByGroup: {
                 '360': [],
-                // Video2D: ['ca9b8aa1-084b-585b-bda5-dc8c9d7f4751'],
-                // Interactive: ['182a5c28-0f2f-5eeb-b536-70d407e4821d'],
-                // Image2D: ['a44a7779-9db6-5ac7-8983-97aae1304785', '56294545-b679-5719-ac94-b31cb30f2705'],
+                'TextCard': ['20657c4f-01f7-5048-8f47-652763f60bd6'],
             },
-            assetIds: [],
+            assetIds: ['20657c4f-01f7-5048-8f47-652763f60bd6'],
         },
         'z9c06cac-c7f2-452d-86e8-8228cc95f52b': {
             ui: {
                 selectedAssetIdByGroup: {},
-                selectedAssetGroup: 'Video2D',
+                selectedAssetGroup: '360',
             },
             primary_asset_id: '',
             name: 'Scene2 (360 Video)',
@@ -54,9 +55,6 @@ const mockFaderStoryData: FaderStory['data'] = {
             duration: 12000,
             assetOrderByGroup: {
                 '360': [],
-                // Video2D: ['ca9b8aa1-084b-585b-bda5-dc8c9d7f4751'],
-                // Interactive: ['182a5c28-0f2f-5eeb-b536-70d407e4821d'],
-                // Image2D: ['a44a7779-9db6-5ac7-8983-97aae1304785', '56294545-b679-5719-ac94-b31cb30f2705'],
             },
             assetIds: [],
         },
@@ -66,7 +64,48 @@ const mockFaderStoryData: FaderStory['data'] = {
         'z9c06cac-c7f2-452d-86e8-8228cc95f52b', // Scene2 (360 Video)
     ],
     // Modified Blueprint Assets attached to the Scene(s), I figure?
-    assets: {},
+    assets: {
+        // The TextCard has no backendId
+        '20657c4f-01f7-5048-8f47-652763f60bd6': {
+            type: 'TextCard',
+            properties: {
+                scaleZ: 1,
+                scaleY: 1,
+                scaleX: 1,
+                scale: 1,
+                rotationZ: 0,
+                rotationY: 134.5,
+                rotationX: 0,
+                positionZ: -10,
+                positionY: 0,
+                positionX: 0,
+            },
+            id: '20657c4f-01f7-5048-8f47-652763f60bd6',
+            group: 'TextCard',
+            display: {
+                showInteractive: false,
+                linkedBackendIds: [],
+                caption: 'A Caption',
+            },
+            data: {
+                textColor: '#ffffff',
+                nextSceneId: '',
+                legacyInteractiveSize: true,
+                headline: 'Textcard Headline',
+                frameOpacity: 0.7,
+                frameOn: true,
+                frameColor: '#ff040b',
+                cardWidth: 10,
+                cardLevel: 1,
+                cardHeight: 10,
+                body: 'Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body Textcard Body',
+                backgroundOpacity: 0.7,
+                backgroundOn: true,
+                backgroundColor: '#009bff',
+            },
+            backendId: '',
+        },
+    },
     // List of unique elements, no duplicates. Blueprints mean..? Not global I'm sure
     assetBlueprints: {},
 };
@@ -76,16 +115,31 @@ const mangleAssetsFromApiWithLocalData = (apiProjectResult: FaderStory, assets: 
     const combinedProject = apiProjectResult;
     combinedProject.data = cloneDeep(mockFaderStoryData); // This seems incredibly stupid, but without cloneDeep I could not push to .assetIds and .assetOrderByGroup['360'] without error..
 
-    // WARN lame hardcode again
-    const image360Scene = combinedProject.data.scenes['f8c06cac-c7f2-452d-86e8-8228cc95f52b'];
-    const video360Scene = combinedProject.data.scenes['z9c06cac-c7f2-452d-86e8-8228cc95f52b'];
+    assets.forEach((asset, idx) => {
+        combinedProject.data.uploadedAssetIds.push(asset.id);
 
-    assets.forEach((asset) => {
+        const freshStoryAsset: FaderStoryAsset = {
+            type: '360',
+            display: defaultAssetDisplay,
+            backendId: asset.id,
+            data: defaultAssetData,
+            id: `TEMP-${idx}-backendId-${asset.id}`, // id only in this story I guess??
+            group: '360',
+            properties: defaultAssetProperties,
+        };
+        // TODO does data.assets only list those FaderBackendAsset's actually placed in a Scene?
+        combinedProject.data.assets[asset.id] = freshStoryAsset;
+
+        // WARN lame hardcode again
         if (asset.media_type === 'image/jpeg') {
-            image360Scene.assetIds.push(asset.id);
+            const image360Scene = combinedProject.data.scenes['f8c06cac-c7f2-452d-86e8-8228cc95f52b'];
+
+            image360Scene.assetIds.unshift(asset.id); // WARN using unshift because in Scene1, a TextCard is added already, however I am calling assetIds[0] in WhichBackground
             image360Scene.assetOrderByGroup['360']!.push(asset.id);
         } else if (asset.media_type === 'video/mp4') {
-            video360Scene.assetIds.push(asset.id);
+            const video360Scene = combinedProject.data.scenes['z9c06cac-c7f2-452d-86e8-8228cc95f52b'];
+
+            video360Scene.assetIds.unshift(asset.id);
             video360Scene.assetOrderByGroup['360']!.push(asset.id);
         }
     });

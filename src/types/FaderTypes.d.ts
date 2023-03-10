@@ -22,7 +22,7 @@ export interface FaderStory {
         };
         scenes: Record<string, FaderScene>;
         sceneOrder: string[];
-        assets: Record<string, StoryAsset>;
+        assets: Record<string, FaderStoryAsset>;
         assetBlueprints: Record<string, StoryAssetBlueprint>;
     };
     custom_player_settings: object;
@@ -38,8 +38,8 @@ export interface FaderStory {
 
 export interface FaderScene {
     ui: {
-        selectedAssetIdByGroup: AssetsKeys;
-        selectedAssetGroup: keyof AssetsKeys;
+        selectedAssetIdByGroup: FaderAssetsKeys;
+        selectedAssetGroup: FaderAssetType;
     };
     primary_asset_id: string;
     name: string;
@@ -52,12 +52,12 @@ export interface FaderScene {
         enableGroundIn360: boolean;
     };
     duration: number;
-    assetOrderByGroup: Partial<Record<keyof AssetsKeys, string[]>>;
+    assetOrderByGroup: Partial<Record<FaderAssetType, string[]>>;
     assetIds: string[];
 }
 
-export interface StoryAsset {
-    type: string; // 'Image'
+export interface FaderStoryAsset {
+    type: FaderAssetType;
     properties: {
         scaleZ: number;
         scaleY: number;
@@ -71,7 +71,7 @@ export interface StoryAsset {
         positionX: number;
     };
     id: string;
-    group: keyof AssetsKeys;
+    group: FaderAssetType;
     display: {
         showInteractive: boolean;
         linkedBackendIds: string[];
@@ -128,4 +128,12 @@ export interface FaderBackendAsset {
     updated_at: string; // some Date format actually?
 }
 
-type AssetsKeys = { 'Video2D'?: string; 'Interactive'?: string; 'Image2D'?: string; 'TextCard'?: string; 'Audio'?: string; '360'?: string };
+type FaderAssetsKeys = {
+    'Video2D'?: string;
+    'Interactive'?: string;
+    'Image2D'?: string;
+    'TextCard'?: string;
+    'Audio'?: string;
+    '360'?: string;
+};
+export type FaderAssetType = keyof FaderAssetsKeys;

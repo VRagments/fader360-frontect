@@ -52,16 +52,9 @@
                 },
                 "duration": 12000,
                 "assetOrderByGroup": {
-                    "Video2D": [
-                        "ca9b8aa1-084b-585b-bda5-dc8c9d7f4751"
-                    ],
-                    "Interactive": [
-                        "182a5c28-0f2f-5eeb-b536-70d407e4821d"
-                    ],
-                    "Image2D": [
-                        "a44a7779-9db6-5ac7-8983-97aae1304785",
-                        "56294545-b679-5719-ac94-b31cb30f2705"
-                    ]
+                    "Video2D": ["ca9b8aa1-084b-585b-bda5-dc8c9d7f4751"],
+                    "Interactive": ["182a5c28-0f2f-5eeb-b536-70d407e4821d"],
+                    "Image2D": ["a44a7779-9db6-5ac7-8983-97aae1304785", "56294545-b679-5719-ac94-b31cb30f2705"]
                 },
                 "assetIds": [
                     "a44a7779-9db6-5ac7-8983-97aae1304785",
@@ -90,13 +83,9 @@
                 },
                 "duration": 50000,
                 "assetOrderByGroup": {
-                    "360": [
-                        "a4fb7708-627e-5d40-b52a-720e16372a51"
-                    ]
+                    "360": ["a4fb7708-627e-5d40-b52a-720e16372a51"]
                 },
-                "assetIds": [
-                    "a4fb7708-627e-5d40-b52a-720e16372a51"
-                ]
+                "assetIds": ["a4fb7708-627e-5d40-b52a-720e16372a51"]
             },
             // Szene2 (360)
             "9c973c3a-319c-4e55-abab-59b2f9b840d3": {
@@ -123,22 +112,12 @@
                 },
                 "duration": 30000,
                 "assetOrderByGroup": {
-                    "Video2D": [
-                        "78c59bb2-5692-5a99-b4e9-f6f099ec3e3e"
-                    ],
-                    "TextCard": [
-                        "20657c4f-01f7-5048-8f47-652763f60bd6"
-                    ],
-                    "Interactive": [
-                        "632ea22a-2a1a-58ae-a9de-3fad11bcc3fb"
-                    ],
+                    "Video2D": ["78c59bb2-5692-5a99-b4e9-f6f099ec3e3e"],
+                    "TextCard": ["20657c4f-01f7-5048-8f47-652763f60bd6"],
+                    "Interactive": ["632ea22a-2a1a-58ae-a9de-3fad11bcc3fb"],
                     "Image2D": [],
-                    "Audio": [
-                        "a09401f7-4bd5-540a-8d47-eced9de2abb3"
-                    ],
-                    "360": [
-                        "225ac798-1925-5ea3-829f-71a96105b5dc"
-                    ]
+                    "Audio": ["a09401f7-4bd5-540a-8d47-eced9de2abb3"],
+                    "360": ["225ac798-1925-5ea3-829f-71a96105b5dc"]
                 },
                 "assetIds": [
                     "225ac798-1925-5ea3-829f-71a96105b5dc",

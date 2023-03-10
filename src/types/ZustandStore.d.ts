@@ -14,6 +14,6 @@ export interface ZustandState {
     };
     project: FaderStory | undefined;
     faderStoryData: {
-        currentAssets: Record<string, FaderBackendAsset>;
+        backendAssets: Record<string, FaderBackendAsset>;
     };
 }
