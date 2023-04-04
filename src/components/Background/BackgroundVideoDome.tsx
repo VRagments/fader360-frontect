@@ -2,7 +2,7 @@ import Hls from 'hls.js';
 import { useMemo, useEffect } from 'react';
 import { BackSide } from 'three';
 import { handleAxiosError } from '../../lib/axios';
-import { backgroundSphereGeometryArgs } from '../WhichEnvironment';
+import { backgroundSphereGeometryArgs } from '../Background';
 
 const BackgroundVideoDome = ({ path }: { path: string }) => {
     if (!Hls.isSupported()) {
@@ -12,7 +12,7 @@ const BackgroundVideoDome = ({ path }: { path: string }) => {
     const [videoElement, videoElementParent] = useMemo(() => {
         const videoElement = document.createElement('video');
         videoElement.id = 'BackgroundVideoDome Video Element';
-        videoElement.loop = true;
+        videoElement.loop = true; // TODO control this somewhere
         videoElement.append('Your browser does not support the video tag.');
 
         /* Needed in order to destroy <video> element on unMount: */
@@ -32,6 +32,7 @@ const BackgroundVideoDome = ({ path }: { path: string }) => {
     }, [path]);
 
     useEffect(() => {
+        /* Remove <video> element (or rather, it's parent) on unMount */
         return () => {
             videoElementParent.removeChild(videoElement);
         };
@@ -49,7 +50,7 @@ const BackgroundVideoDome = ({ path }: { path: string }) => {
 
 function addHlsEventListeners(hls: Hls) {
     hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-        //
+        // Use later?
     });
 
     hls.on(Hls.Events.MANIFEST_PARSED, function (_event, _data) {

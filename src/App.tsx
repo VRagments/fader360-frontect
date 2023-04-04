@@ -7,12 +7,14 @@ import FaderStoryViewer from './pages/FaderStoryViewer';
 
 function App() {
     return (
-        <div className='relative h-full w-full'>
+        <div className='flex h-screen w-screen flex-col'>
             <Nav />
             <BrowserRouter basename={process.env.PUBLIC_URL}>
                 <Routes>
                     <Route path='view' element={<FaderStoryViewer />} />
-                    <Route path='edit' element={<FaderStoryEditor />} />
+                    <Route path='edit' element={<FaderStoryEditor />}>
+                        <Route path=':sceneIdParam' element={<FaderStoryEditor />} />
+                    </Route>
                     <Route path='page' element={<Page />} />
                     <Route path='/' element={<Navigate to={'view'} />} />
                     <Route

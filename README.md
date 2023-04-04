@@ -6,12 +6,12 @@
 
 (Some of the following steps might be superfluous for non-WSL users)
 
--   `sudo service postgresql start`
+-   (`sudo service postgresql start`)
 -   `sudo dockerd` (1st shell used)
--   `make clean`
--   `make init-web-assets`
+-   (`make clean`)
+-   (`make init-web-assets`)
 -   `make docker-build`
--   `make docker-refresh-db`
+-   (`make docker-refresh-db`) - there is also a migrate command now
 -   `make docker-dev` (2nd shell used)
 -   `make proxy` (3d shell used)
 

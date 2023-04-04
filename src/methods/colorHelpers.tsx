@@ -1,3 +1,5 @@
+import hexRgb from 'hex-rgb';
+
 export const mergeHexAndOpacityValues = (color: string, opacity: number) => {
     if (!color.includes('#')) {
         throw new Error(`Parameter "color" does not look like a Hex string! (${color})`);
@@ -12,4 +14,9 @@ export const mergeHexAndOpacityValues = (color: string, opacity: number) => {
     const colorAndOpacityHex = color + opacityHex;
 
     return colorAndOpacityHex;
+};
+
+export const hexBgColorToTwRgbColor = (hexString: string) => {
+    const rgbaObject = hexRgb(hexString);
+    return `rgb(${rgbaObject.red} ${rgbaObject.green} ${rgbaObject.blue} / var(--tw-bg-opacity))`;
 };

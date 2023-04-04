@@ -1,30 +1,29 @@
 import { OrbitControls, PerspectiveCamera, Sphere } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import useZustand from '../lib/zustand/zustand';
-import { filterStoryAssetsByScene } from '../methods/faderHelpers';
 import { FaderScene } from './FaderScene';
-import { backgroundSphereGeometryArgs } from './WhichBackground';
+import { backgroundSphereGeometryArgs } from './Background';
 import { Font, FontLoader, mergeBufferGeometries } from 'three-stdlib';
 import { BufferGeometry, MathUtils, Mesh, MeshBasicMaterial, ShapeGeometry } from 'three';
 import { useEffect, useState } from 'react';
+import { FaderSceneType } from '../types/FaderTypes';
 
-type FaderStoryProps = {
-    sceneId: string;
+type FaderThreeCanvasProps = {
+    scene: FaderSceneType;
     debug: boolean;
 };
-const FaderStory = (props: FaderStoryProps) => {
-    const { sceneId, debug } = props;
-    const faderStory = useZustand((state) => state.project);
+const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
+    const { scene, debug } = props;
+    const faderStory = useZustand((state) => state.fader.faderStory);
 
-    if (!faderStory || !sceneId) {
+    if (!faderStory) {
         return null;
     }
-
-    const currentScene = faderStory.data.scenes[sceneId];
 
     return (
         <Canvas
             frameloop={'always'} // TODO 'demand' would be lots nicer - for now it interferes with videoplayback, though
+            id={'THREE (R3F) Canvas'}
             gl={{ antialias: true }}
         >
             <OrbitControls
@@ -43,7 +42,7 @@ const FaderStory = (props: FaderStoryProps) => {
                 />
             </OrbitControls>
 
-            <FaderScene currentScene={currentScene} currentSceneAssets={filterStoryAssetsByScene(currentScene, faderStory.data.assets)} />
+            <FaderScene currentScene={scene} />
 
             <Grid />
 
@@ -52,7 +51,7 @@ const FaderStory = (props: FaderStoryProps) => {
     );
 };
 
-export default FaderStory;
+export default FaderThreeCanvas;
 
 const Grid = () => {
     const [textMesh, setTextMesh] = useState<Mesh | undefined>(undefined);
