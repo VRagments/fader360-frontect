@@ -1,13 +1,14 @@
-import useZustand from '../lib/zustand/zustand';
-import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByGroupType } from '../methods/faderHelpers';
-import { FaderSceneType } from '../types/FaderTypes';
-import Audios from './AssetConsumption/Audios';
-import Environments from './AssetConsumption/Environments';
-import Images2d from './AssetConsumption/Images2d';
-import Interactives from './AssetConsumption/Interactives';
-import TextCards from './AssetConsumption/TextCards';
-import Videos2d from './AssetConsumption/Videos2d';
-import Background from './Background';
+import { useMemo } from 'react';
+import useZustand from '../../lib/zustand/zustand';
+import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType } from '../../methods/faderHelpers';
+import { FaderSceneType } from '../../types/FaderTypes';
+import Audios from '../AssetConsumption/Audios';
+import Environments from '../AssetConsumption/Environments';
+import Images2d from '../AssetConsumption/Images2d';
+import SceneLinks from '../AssetConsumption/SceneLinks';
+import TextCards from '../AssetConsumption/TextCards';
+import Videos2d from '../AssetConsumption/Videos2d';
+import Background from './Background/Background';
 
 type FaderSceneProps = {
     currentScene: FaderSceneType;
@@ -20,13 +21,18 @@ export const FaderScene = (props: FaderSceneProps) => {
         return null;
     }
 
+    const scene360BackendAssets = useMemo(
+        () => ({
+            ...getSortedBackendAssetsByType(faderStoryBackendAssets)['Video'],
+            ...getSortedBackendAssetsByType(faderStoryBackendAssets)['Image'],
+        }),
+        [faderStoryBackendAssets]
+    );
+
     return (
         <group name='THREE (R3F) Canvas First Subgroup'>
             {currentScene.data.environment.preset && (
-                <Background
-                    scene360BackendAssets={getSortedBackendAssetsByGroupType(faderStoryBackendAssets)['360']}
-                    backgroundEnvironment={currentScene.data.environment}
-                />
+                <Background scene360BackendAssets={scene360BackendAssets} backgroundEnvironment={currentScene.data.environment} />
             )}
 
             {currentScene.data.assetOrderByGroup['360']?.length && (
@@ -75,11 +81,11 @@ export const FaderScene = (props: FaderSceneProps) => {
                 />
             )}
 
-            {currentScene.data.assetOrderByGroup.Interactive?.length && (
-                <Interactives
+            {currentScene.data.assetOrderByGroup.SceneLink?.length && (
+                <SceneLinks
                     scene={currentScene}
-                    storyInteractiveBackendAssets={getBackendAssetsFromStoryAssetsByGroupType(
-                        'Interactive',
+                    storySceneLinkBackendAssets={getBackendAssetsFromStoryAssetsByGroupType(
+                        'SceneLink',
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}

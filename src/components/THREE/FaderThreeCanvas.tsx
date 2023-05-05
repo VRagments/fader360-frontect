@@ -1,12 +1,12 @@
 import { OrbitControls, PerspectiveCamera, Sphere } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import useZustand from '../lib/zustand/zustand';
+import useZustand from '../../lib/zustand/zustand';
 import { FaderScene } from './FaderScene';
-import { backgroundSphereGeometryArgs } from './Background';
 import { Font, FontLoader, mergeBufferGeometries } from 'three-stdlib';
 import { BufferGeometry, MathUtils, Mesh, MeshBasicMaterial, ShapeGeometry } from 'three';
 import { useEffect, useState } from 'react';
-import { FaderSceneType } from '../types/FaderTypes';
+import { FaderSceneType } from '../../types/FaderTypes';
+import { backgroundSphereGeometryArgs } from '../../lib/defaults';
 
 type FaderThreeCanvasProps = {
     scene: FaderSceneType;
@@ -26,27 +26,30 @@ const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
             id={'THREE (R3F) Canvas'}
             gl={{ antialias: true }}
         >
-            <OrbitControls
-                enableZoom={debug}
-                enablePan={debug}
-                target={[0.0001, 1.75, 0] /* teeny positive value to change initial orientation */}
-            >
-                <PerspectiveCamera
-                    attach={'camera'}
-                    fov={60}
-                    position={[0, 1.75, 0]}
-                    name='default Perspective Camera'
-                    makeDefault={!debug}
-                    near={0.0001}
-                    far={(backgroundSphereGeometryArgs![0] as number) + 5}
-                />
-            </OrbitControls>
+            {/* Since Front and Back are not synced between BackgroundImage/Video and GroundProjEnvironment (the latter's shader uses Worldspace), we rotate the rest: */}
+            <group rotation={[0, MathUtils.degToRad(180), 0]}>
+                <OrbitControls
+                    enableZoom={debug}
+                    enablePan={debug}
+                    target={[-0.0001, 1.75, 0] /* teeny positive value to change initial orientation */}
+                >
+                    <PerspectiveCamera
+                        attach={'camera'}
+                        fov={60}
+                        position={[0, 1.75, 0]}
+                        name='default Perspective Camera'
+                        makeDefault={!debug}
+                        near={0.01}
+                        far={backgroundSphereGeometryArgs[0] + 5}
+                    />
+                </OrbitControls>
 
-            <FaderScene currentScene={scene} />
+                <FaderScene currentScene={scene} />
 
-            <Grid />
+                <Grid />
 
-            {debug && <Debug />}
+                {debug && <Debug />}
+            </group>
         </Canvas>
     );
 };

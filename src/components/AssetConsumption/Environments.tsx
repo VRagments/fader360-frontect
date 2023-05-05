@@ -1,5 +1,5 @@
 import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
-import Asset, { AssetJsxElementParams } from './Asset';
+import Asset from './Asset';
 
 /* TODO Expand to also use GLTF backgrounds */
 
@@ -37,7 +37,6 @@ const Environments = (props: EnvironmentsProps) => {
 
 export default Environments;
 
-// TODO what do we do here exactly? <WhichBackground> ?
-const EnvironmentJsxElement = (_params: AssetJsxElementParams) => {
+const EnvironmentJsxElement = () => {
     return <></>;
 };

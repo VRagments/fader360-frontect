@@ -4,6 +4,7 @@
         "password": ""
     },
     "dev": {
-        "debugURLenabled": false
+        "devMode": false,
+        "debugEnabled": false
     }
 }

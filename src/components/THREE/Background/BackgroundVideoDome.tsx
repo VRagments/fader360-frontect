@@ -1,8 +1,8 @@
 import Hls from 'hls.js';
 import { useMemo, useEffect } from 'react';
 import { BackSide } from 'three';
-import { handleAxiosError } from '../../lib/axios';
-import { backgroundSphereGeometryArgs } from '../Background';
+import { handleAxiosError } from '../../../lib/axios';
+import { backgroundSphereGeometryArgs } from '../../../lib/defaults';
 
 const BackgroundVideoDome = ({ path }: { path: string }) => {
     if (!Hls.isSupported()) {

@@ -1,6 +1,6 @@
 import useZustand from './zustand/zustand';
-import { createProjectData, createSceneData } from './createData';
-import { FaderBackendAsset, FaderAssetGroupType, FaderSceneType, FaderStoryAssetType, FaderStoryType } from '../types/FaderTypes';
+import { faderNestedObjectKeysAreEqual, syncProjectData, syncSceneData } from './createData';
+import { FaderBackendAsset, FaderAssetGroupType, FaderSceneType, FaderSceneAssetType, FaderStoryType } from '../types/FaderTypes';
 import {
     api_ListBackendAssetsAssociatedWithProject,
     api_ListProjects,
@@ -11,6 +11,10 @@ import {
     api_UpdateScene,
 } from './axios';
 import { createAsset } from './createAsset';
+import { defaultProjectData, defaultSceneData } from './defaults';
+import buildConfig from '../buildConfig';
+
+const devMode = buildConfig.dev.devMode;
 
 const { storeDeleteFaderStoryAsset, storeAddFaderStoryAssetToScene, storeUpdateFaderStoryAsset, storeUpdateFaderScene } =
     useZustand.getState().methods;
@@ -29,14 +33,25 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
 
     /*  
         Get Project (first in list for now).
-        If .data field is empty, add default properties.
-        Then send to store (fader.faderStory).
+        If .data field is empty/incomplete, add default properties.
     */
     const projects = await api_ListProjects().then((result) => result);
     const firstProjectId = (projects as FaderStoryType[])[0].id; // TODO Only ever need one Project, id will likely be passed in externally
     const firstProject = (await api_ShowProject(firstProjectId)) as FaderStoryType;
-    if (Object.keys(firstProject.data).length === 0) {
-        firstProject.data = createProjectData();
+
+    if (
+        !Object.keys(firstProject.data).length ||
+        !faderNestedObjectKeysAreEqual({ object1: firstProject.data, object2: defaultProjectData })
+    ) {
+        devMode &&
+            // eslint-disable-next-line no-console
+            console.log(
+                '%c[api_and_store_wrappers]',
+                'color: #23c891',
+                `Fader Story's ${firstProject.id} .data folder is null or incomplete, filling with required fields!`
+            );
+
+        firstProject.data = syncProjectData(firstProject.data);
     }
 
     /*  
@@ -49,8 +64,24 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
         throw new Error('FaderStory has no associated Scenes!');
     } else {
         allProjectScenes.forEach((projectScene, idx) => {
-            if (projectScene.data === null || Object.keys(projectScene.data).length == 0) {
-                projectScene.data = createSceneData();
+            if (
+                !Object.keys(projectScene.data).length ||
+                !faderNestedObjectKeysAreEqual({
+                    object1: projectScene.data,
+                    object2: defaultSceneData,
+                    opts: { excludeObjKeys: ['assets'] },
+                })
+            ) {
+                devMode &&
+                    // eslint-disable-next-line no-console
+                    console.log(
+                        '%c[api_and_store_wrappers]',
+                        'color: #23c891',
+                        `Fader Scene's (${projectScene.id}) .data folder is null or incomplete, filling with required fields!`
+                    );
+
+                projectScene.data = syncSceneData(projectScene.data);
+
                 api_UpdateScene(projectScene).catch((e: string) => new Error(e));
             }
 
@@ -58,6 +89,7 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
                 firstProject.data.sceneOrder.push(projectScene.id);
             }
         });
+
         const scenes = arrayToRecordOfIds(allProjectScenes);
         storeSetFaderScenes(scenes);
     }
@@ -72,8 +104,12 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
     storeSetFaderStoryBackendAssets(backendAssets);
 
     if (projectBackendAssets.length > 0) {
+        // removeDuplicatesInArray(firstProject.data.uploadedAssetIds)
+
         projectBackendAssets.forEach((backendAsset) => {
-            firstProject.data.uploadedAssetIds.push(backendAsset.id);
+            if (!firstProject.data.uploadedAssetIds.includes(backendAsset.id)) {
+                firstProject.data.uploadedAssetIds.push(backendAsset.id);
+            }
         });
     }
 
@@ -84,7 +120,7 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
     await api_UpdateProject(firstProjectId, firstProject);
 };
 
-export const wrappers_UpdateStoryAssetInStoreAndRemote = (storyAsset: FaderStoryAssetType, scene: FaderSceneType) => {
+export const wrappers_UpdateStoryAssetInStoreAndRemote = (storyAsset: FaderSceneAssetType, scene: FaderSceneType) => {
     const asyncUpdateWrapper = async () => {
         storeUpdateFaderStoryAsset(storyAsset, scene.id);
         const updatedScene = useZustand.getState().fader.faderScenes![scene.id];
@@ -96,9 +132,13 @@ export const wrappers_UpdateStoryAssetInStoreAndRemote = (storyAsset: FaderStory
 };
 
 /** Creates new empty Asset, adds it to Store and Remote */
-export const wrappers_AddNewAssetToSceneStoreAndRemote = (groupType: FaderAssetGroupType, scene: FaderSceneType) => {
+export const wrappers_AddNewAssetToSceneStoreAndRemote = (
+    backendAsset: FaderBackendAsset,
+    groupType: FaderAssetGroupType,
+    scene: FaderSceneType
+) => {
     /* New asset definition */
-    const newAsset = createAsset(groupType);
+    const newAsset = createAsset(groupType, backendAsset);
 
     /* Add asset to FaderScene */
     storeAddFaderStoryAssetToScene(newAsset, scene.id);
@@ -108,7 +148,7 @@ export const wrappers_AddNewAssetToSceneStoreAndRemote = (groupType: FaderAssetG
 };
 
 /** Deletes asset from local and remote (the latter via updating scene call) */
-export const wrappers_DeleteAssetFromSceneStoreAndRemote = (asset: FaderStoryAssetType, scene: FaderSceneType) => {
+export const wrappers_DeleteAssetFromSceneStoreAndRemote = (asset: FaderSceneAssetType, scene: FaderSceneType) => {
     storeDeleteFaderStoryAsset(asset, scene.id);
     const updatedScene = useZustand.getState().fader.faderScenes![scene.id];
     api_UpdateScene(updatedScene).catch((e) => new Error(e as string));

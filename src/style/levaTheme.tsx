@@ -1,27 +1,28 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars,  @typescript-eslint/no-unsafe-member-access */
-import hexRgb from 'hex-rgb';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { hexBgColorToTwRgbColor } from '../methods/colorHelpers';
 import tailwindConfig from '../tailwind.config.js';
 
-// @ts-expect-error "Property 'colors' does not exist on type 'UnwrapResolvables'"
-const tailwindConfigColors = resolveConfig(tailwindConfig).theme.colors;
-
-// background-color: rgb(100 116 139 / var(--tw-bg-opacity));
+const tailwindConfigTheme = resolveConfig(tailwindConfig).theme;
+// @ts-expect-error ...
+const {
+    colors: tailwindConfigColors,
+    fontFamily: tailwindConfigFonts,
+}: { colors: Record<string, string>; fontFamily: Record<string, string[]> } = tailwindConfigTheme;
 
 /** OUR default values. Originals here: https://github.com/pmndrs/leva/blob/main/packages/leva/src/styles/stitches.config.ts */
 export const levaThemeValues: LevaThemeType = {
     colors: {
-        elevation1: hexBgColorToTwRgbColor(tailwindConfigColors.slate['700'] as string), // title bg
-        elevation2: hexBgColorToTwRgbColor(tailwindConfigColors.slate['500'] as string), // panels bg
-        elevation3: hexBgColorToTwRgbColor(tailwindConfigColors.slate['800'] as string), // input fields
+        elevation1: hexBgColorToTwRgbColor(tailwindConfigColors.slate['700']), // title bg
+        elevation2: hexBgColorToTwRgbColor(tailwindConfigColors.slate['500']), // panels bg
+        elevation3: hexBgColorToTwRgbColor(tailwindConfigColors.slate['800']), // input fields
         vivid1: tailwindConfigColors.red['500'],
         accent1: tailwindConfigColors.slate['100'], // border color onMouseOver
-        accent2: tailwindConfigColors.slate['200'], // sliders
+        accent2: tailwindConfigColors.slate['400'], // sliders
         accent3: tailwindConfigColors.slate['50'], // slider onDrag
-        highlight1: tailwindConfigColors.slate['200'], // Title font
+        highlight1: tailwindConfigColors.slate['100'], // Title font
         highlight2: tailwindConfigColors.slate['300'], // Regular font
-        highlight3: tailwindConfigColors.slate['400'], // Sub-header Font
+        highlight3: tailwindConfigColors.slate['300'], // Sub-header Font
     },
     radii: {
         xs: '2px',
@@ -33,6 +34,10 @@ export const levaThemeValues: LevaThemeType = {
         md: '10px',
         rowGap: '7px',
         colGap: '7px',
+    },
+    fonts: {
+        mono: tailwindConfigFonts.mono.join(', '),
+        sans: tailwindConfigFonts.sans.join(', '),
     },
     fontSizes: {
         root: '11px',
@@ -89,6 +94,10 @@ export type LevaThemeType = {
         md: string;
         rowGap: string;
         colGap: string;
+    };
+    fonts: {
+        mono: string;
+        sans: string;
     };
     fontSizes: {
         root: string;

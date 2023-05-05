@@ -1,5 +1,6 @@
+import Hls from 'hls.js';
+import { useEffect, useRef } from 'react';
 import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
-import { mergeHexAndOpacityValues } from '../../methods/colorHelpers';
 import Asset, { AssetJsxElementParams } from './Asset';
 
 type AudiosProps = {
@@ -36,40 +37,29 @@ const Audios = (props: AudiosProps) => {
 
 export default Audios;
 
-const AudioJsxElement = ({ asset, backendAsset, assetDataRef }: AssetJsxElementParams) => {
-    if (!backendAsset) {
-        return <></>;
-    }
+const AudioJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const hls = useRef({ hls: new Hls(), audioSource: backendAsset?.static_url });
 
-    return (
-        <div
-            id={asset.id}
-            className='fader-3d-card'
-            style={{
-                color: assetDataRef.current.textColor,
-                backgroundColor: assetDataRef.current.backgroundOn
-                    ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                    : 'transparent',
-                border: `2px ${assetDataRef.current.frameOn ? 'solid' : 'none'} ${mergeHexAndOpacityValues(
-                    assetDataRef.current.frameColor,
-                    assetDataRef.current.frameOpacity
-                )}`,
-            }}
-        >
-            <div
-                className='bold mb-1 w-full rounded p-1 px-2 text-lg'
-                style={{
-                    backgroundColor: assetDataRef.current.backgroundOn
-                        ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                        : 'transparent',
-                }}
-            >
-                {assetDataRef.current.headline}
-            </div>
-            <audio
-                src={backendAsset.static_url}
-                style={{ width: `${backendAsset.attributes.width}px`, height: `${backendAsset.attributes.height}px` }}
-            />
-        </div>
-    );
+    useEffect(() => {
+        if (audioRef.current) {
+            /* Once audioRefs have been set:  */
+            hls.current.hls.loadSource(hls.current.audioSource as string);
+            hls.current.hls.attachMedia(audioRef.current);
+
+            hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
+                throw new Error(`${event}, ${data}`);
+            });
+        }
+    }, [audioRef.current]);
+
+    if (!backendAsset || !Hls.isSupported()) {
+        return <></>;
+    } else {
+        return (
+            <audio ref={audioRef} className='block ' controls autoPlay={true} preload='auto' style={{ width: `260px`, height: `20px` }}>
+                Your browser does not support the audio element.
+            </audio>
+        );
+    }
 };

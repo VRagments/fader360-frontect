@@ -1,20 +1,5 @@
 /* Api Types */
 
-export interface FaderStoryDataType {
-    assetBlueprints: Record<string, StoryAssetBlueprint>;
-    sceneOrder: FaderSceneType['id'][];
-    ui: {
-        nextTutorialStep: number;
-        selectedSceneId: string;
-        showEnvironmentInfo: boolean;
-        showSceneInfo: boolean;
-        userSelectedThumbnail: boolean;
-    };
-    /** Backend Id's */
-    uploadedAssetIds: string[];
-    version: number;
-}
-
 export interface FaderStoryType {
     author: null | string;
     created_at: string; // '2023-01-25 11:26:13'
@@ -35,26 +20,20 @@ export interface FaderStoryType {
     visibility: string; // 'discoverable'
 }
 
-export interface FaderSceneDataType {
-    /** Local asset guid's */
-    assetIds: FaderStoryAssetType['id'][];
-    assetOrderByGroup: Record<FaderAssetGroupType, FaderStoryAssetType['id'][]>;
-    /** Local asset guid's */
-    assets: Record<string, FaderStoryAssetType>;
-    environment: {
-        seed: number;
-        /** If `preset == ''` then Env is off, if `preset` is a UUID, Env is set to this UUID's FaderBackendAsset */
-        preset: string;
-        positionY: number;
-        enableGroundIn360: boolean;
-    };
+export interface FaderStoryDataType {
+    assetBlueprints: Record<string, FaderSceneAssetBlueprint>;
+    sceneOrder: FaderSceneType['id'][];
     ui: {
-        selectedAssetIdByGroup: Record<string, FaderAssetGroupType>;
-        selectedAssetGroup: FaderAssetGroupType;
+        nextTutorialStep: number;
+        selectedSceneId: string;
+        showEnvironmentInfo: boolean;
+        showSceneInfo: boolean;
+        userSelectedThumbnail: boolean;
     };
+    /** Backend Id's */
+    uploadedAssetIds: string[];
+    version: number;
 }
-
-// export type FaderSceneDataType = Record<string, any>; // TODO ..for now
 
 export interface FaderSceneType {
     created_at: string;
@@ -70,7 +49,26 @@ export interface FaderSceneType {
     updated_at: string;
 }
 
-export interface FaderStoryAssetType {
+export interface FaderSceneDataType {
+    /** Local asset guid's */
+    assetIds: FaderSceneAssetType['id'][];
+    assetOrderByGroup: Record<FaderAssetGroupType, FaderSceneAssetType['id'][]>;
+    assets: Record<string, FaderSceneAssetType>;
+    environment: {
+        enableGroundIn360: boolean;
+        positionY: number;
+        /** If `preset == ''` then Env is off, if `preset` is a UUID, Env is set to this UUID's `FaderBackendAsset.id` */
+        preset: string;
+        radius: number;
+        seed: number;
+    };
+    ui: {
+        selectedAssetIdByGroup: Record<string, FaderAssetGroupType>;
+        selectedAssetGroup: FaderAssetGroupType;
+    };
+}
+
+export interface FaderSceneAssetType {
     backendId: FaderBackendAsset['id'];
     data: {
         backgroundColor: string;
@@ -85,11 +83,12 @@ export interface FaderStoryAssetType {
         frameOpacity: number;
         headline: string;
         legacyInteractiveSize: boolean;
+        name: string /* Added by myself to store name from FaderBackendAsset */;
         nextSceneId: string;
         textColor: string;
     };
     display: {
-        caption: string;
+        caption: string; // This will be superseded by 'headline', or rather 'body'
         linkedBackendIds: string[];
         showInteractive: boolean;
     };
@@ -112,14 +111,14 @@ export interface FaderStoryAssetType {
 }
 
 // Not sure what purpose these serve tbh
-export interface StoryAssetBlueprint {
+export interface FaderSceneAssetBlueprint {
     backendId: FaderBackendAsset['id'];
     data: {
         headline: string;
         body: string;
     };
     /** Local guid */
-    id: FaderStoryAssetType['id']; // or 'string'? Does this refer to the FaderStoryAssetType id or is it a separate id?
+    id: FaderSceneAssetType['id']; // or 'string'? Does this refer to the FaderSceneAssetType id or is it a separate id?
     type: FaderAssetType;
 }
 
@@ -135,7 +134,7 @@ export interface FaderBackendAsset {
     id: string;
     inserted_at: string; // some Date format actually?
     lowres_image: string | null;
-    media_type: string | null; // 'image/jpeg'
+    media_type: string; // 'image/jpeg'
     midres_image: string;
     name: string;
     preview_image: string | null;
@@ -146,6 +145,7 @@ export interface FaderBackendAsset {
     updated_at: string; // some Date format actually?
 }
 
-export type FaderAssetGroupType = 'Video2D' | 'Interactive' | 'Image2D' | 'TextCard' | 'Audio' | '360';
+/* Renamed "Interactive" to "SceneLink" */
+export type FaderAssetGroupType = 'Video2D' | 'SceneLink' | 'Image2D' | 'TextCard' | 'Audio' | '360';
 
-export type FaderAssetType = 'Video' | 'Audio' | 'TextCard' | 'Image' | 'Interactive';
+export type FaderAssetType = 'Video' | 'Audio' | 'TextCard' | 'Image' | 'SceneLink';

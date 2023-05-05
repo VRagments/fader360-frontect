@@ -111,10 +111,21 @@ const useZustand = create<ZustandState>()(
                             'storeDeleteFaderStoryAsset'
                         );
                     },
-                    storeAddLevaPanel: (levaPanel) => {
+                    storeAddLevaPanel: (levaPanel, replace = false) => {
                         set(
                             (draftState) => {
-                                draftState.fader.faderLevaPanels.push(levaPanel);
+                                const draftFaderLevaPanels = draftState.fader.faderLevaPanels;
+
+                                if (replace) {
+                                    for (let i = 0; i <= draftFaderLevaPanels.length; i++) {
+                                        if (levaPanel.id == draftFaderLevaPanels[i].id) {
+                                            draftFaderLevaPanels.splice(i, 1, levaPanel);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    draftFaderLevaPanels.push(levaPanel);
+                                }
                             },
                             false,
                             'storeAddLevaPanel'

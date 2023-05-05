@@ -1,8 +1,8 @@
 import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
-import { mergeHexAndOpacityValues } from '../../methods/colorHelpers';
 import Asset, { AssetJsxElementParams } from './Asset';
 import Hls from 'hls.js';
 import { useEffect, useRef } from 'react';
+import { defaultCardWidth, defaultCardHeight } from '../../lib/defaults';
 
 type Videos2dProps = {
     scene: FaderSceneType;
@@ -38,7 +38,7 @@ const Videos2d = (props: Videos2dProps) => {
 
 export default Videos2d;
 
-const Video2dJsxElement = ({ asset, backendAsset, assetDataRef }: AssetJsxElementParams) => {
+const Video2dJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
     if (!backendAsset || !Hls.isSupported()) {
         return <></>;
     }
@@ -59,42 +59,19 @@ const Video2dJsxElement = ({ asset, backendAsset, assetDataRef }: AssetJsxElemen
     }, [videoRef.current]);
 
     return (
-        <div
-            id={asset.id}
-            className='fader-3d-card'
-            style={{
-                color: assetDataRef.current.textColor,
-                backgroundColor: assetDataRef.current.backgroundOn
-                    ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                    : 'transparent',
-                border: `2px ${assetDataRef.current.frameOn ? 'solid' : 'none'} ${mergeHexAndOpacityValues(
-                    assetDataRef.current.frameColor,
-                    assetDataRef.current.frameOpacity
-                )}`,
-            }}
+        <video
+            ref={videoRef}
+            controls
+            playsInline
+            preload='auto'
+            autoPlay={false}
+            crossOrigin='anonymous'
+            disablePictureInPicture
+            width={Math.min(backendAsset.attributes.width, defaultCardWidth)}
+            height={Math.min(backendAsset.attributes.height, defaultCardHeight)}
+            poster={backendAsset.preview_image as string}
         >
-            <div
-                className='bold mb-1 w-full rounded p-1 px-2 text-lg'
-                style={{
-                    backgroundColor: assetDataRef.current.backgroundOn
-                        ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                        : 'transparent',
-                }}
-            >
-                {assetDataRef.current.headline}
-            </div>
-            <video
-                ref={videoRef}
-                controls
-                playsInline
-                preload='auto'
-                autoPlay={false}
-                crossOrigin='anonymous'
-                disablePictureInPicture
-                width={backendAsset.attributes.width}
-                height={backendAsset.attributes.height}
-                poster={backendAsset.preview_image as string}
-            />
-        </div>
+            Your device does not support this form of video playback!
+        </video>
     );
 };

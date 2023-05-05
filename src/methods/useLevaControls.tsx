@@ -1,21 +1,21 @@
 import { useControls, folder, button } from 'leva';
 import { Schema, StoreType } from 'leva/dist/declarations/src/types';
 import { cloneDeep } from 'lodash';
-import { useEffect, useState } from 'react';
-import { backgroundSphereGeometryArgs } from '../components/Background';
+import { useEffect, useMemo, useState } from 'react';
 import { wrappers_DeleteAssetFromSceneStoreAndRemote, wrappers_UpdateSceneInLocalAndRemote } from '../lib/api_and_store_wrappers';
+import { backgroundSphereGeometryArgs } from '../lib/defaults';
 import useZustand from '../lib/zustand/zustand';
-import { FaderBackendAsset, FaderSceneType, FaderStoryAssetType } from '../types/FaderTypes';
-import { getSortedBackendAssetsByGroupType } from './faderHelpers';
+import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../types/FaderTypes';
+import { getSortedBackendAssetsByType } from './faderHelpers';
 
-type UseControlsWrapperParams = {
-    asset: FaderStoryAssetType;
-    assetPropertiesRef: React.MutableRefObject<FaderStoryAssetType['properties']>;
-    assetDataRef: React.MutableRefObject<FaderStoryAssetType['data']>;
+type UseControlsWrapperAssetPropertiesParams = {
+    asset: FaderSceneAssetType;
+    assetPropertiesRef: React.MutableRefObject<FaderSceneAssetType['properties']>;
+    assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
     store?: StoreType;
     scene?: FaderSceneType;
 };
-export const useControlsWrapper = (params: UseControlsWrapperParams) => {
+export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAssetPropertiesParams) => {
     const { asset, assetPropertiesRef, assetDataRef, store, scene } = params;
 
     const textContent = {
@@ -99,8 +99,8 @@ export const useControlsWrapper = (params: UseControlsWrapperParams) => {
                 posDistance: {
                     label: 'Distance',
                     value: assetPropertiesRef.current.positionZ,
-                    min: -100, // for now, in order to handle minus values coming in from old backend.
-                    max: 100,
+                    min: 0, // for now, in order to handle minus values coming in from old backend.
+                    max: backgroundSphereGeometryArgs[0],
                     step: 1,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
@@ -269,94 +269,156 @@ export const useControlsWrapper = (params: UseControlsWrapperParams) => {
     return useControls(() => defaultControls, { store });
 };
 
-const backgroundSphereRadius = backgroundSphereGeometryArgs![0] as number;
+const backgroundSphereRadius = backgroundSphereGeometryArgs[0];
 
 export const useControlsWrapperOptionsPanel = (store: StoreType, scene: FaderSceneType) => {
     const backendAssets = useZustand((state) => state.fader.faderStoryBackendAssets);
-    const sortedBackendAssets = getSortedBackendAssetsByGroupType(backendAssets);
+    const namedEnvironmentBackendAssetIdRecord = useMemo(
+        () =>
+            generateNamedBackendAssetIdRecord({
+                ...getSortedBackendAssetsByType(backendAssets)['Video'],
+                ...getSortedBackendAssetsByType(backendAssets)['Image'],
+            }),
+        [backendAssets]
+    );
 
+    const [sceneId, setSceneId] = useState(scene.id);
     const [enableBackground, setEnableBackground] = useState(scene.data.environment.preset !== '' ? true : false);
     const [backgroundSelectValue, setBackgroundSelectValue] = useState(scene.data.environment.preset);
     const [enableGround, setEnableGround] = useState(scene.data.environment.enableGroundIn360);
     const [groundYPos, setGroundYPos] = useState(scene.data.environment.positionY);
+    const [groundRadius, setGroundRadius] = useState(scene.data.environment.radius);
 
-    const backgroundsFolderSchema = {
-        enableBg: {
-            label: 'Enable Background',
-            value: enableBackground,
-            onChange: (value: boolean) => {
-                setEnableBackground(value);
-            },
-            transient: false,
-        },
-        Background: folder(
-            {
-                backgroundSelect: {
-                    label: 'Available 360 Backgrounds',
-                    options: [backgroundSelectValue],
-                    onChange: (value: FaderBackendAsset['id']) => {
-                        setBackgroundSelectValue(value);
-                    },
-                    transient: false,
-                },
-                enableGround: {
-                    label: 'Enable Ground',
-                    value: enableGround,
-                    onChange: (val: boolean, _path, { initial }) => {
-                        !initial && setEnableGround(val);
-                    },
-                },
-                groundHeight: {
-                    label: 'Ground Height',
-                    value: groundYPos,
-                    min: -backgroundSphereRadius,
-                    max: backgroundSphereRadius,
-                    step: 1,
-                    onChange: (val: number, _path, { initial }) => {
-                        !initial && setGroundYPos(val);
-                    },
-                    transient: false,
-                    render: (get) => get('Scene Background.Background.enableGround') as boolean,
-                },
-            },
-            {
-                render: (get) => get('Scene Background.enableBg') as boolean,
-            }
-        ),
-        Preset: folder({
-            presetSelect: {
-                label: '3D Presets',
-                options: { None: null },
-                disabled: true,
-                render: (get) => get('Scene Background.enableBg') as boolean,
-            },
-        }),
-    };
+    /* Update stale states upon scene change (via <ScenePicker>, for instance): */
+    useEffect(() => {
+        setSceneId(scene.id);
+        setEnableBackground(scene.data.environment.preset !== '' ? true : false);
+        setBackgroundSelectValue(scene.data.environment.preset);
+        setEnableGround(scene.data.environment.enableGroundIn360);
+        setGroundYPos(scene.data.environment.positionY);
+        setGroundRadius(scene.data.environment.radius);
+    }, [scene.id]);
 
-    const environmentBackendAssetsKeyArray = Object.keys(sortedBackendAssets['360']);
-    if (environmentBackendAssetsKeyArray.length) {
-        // @ts-expect-error ...
-        backgroundsFolderSchema.Background.schema.backgroundSelect.options = environmentBackendAssetsKeyArray.map(
-            (envKey) => sortedBackendAssets['360'][envKey].id
-        );
-    }
+    const dependencies = [enableBackground, backgroundSelectValue, enableGround, groundYPos, groundRadius, backendAssets];
+
+    const backgroundsFolderSchema = useMemo(() => {
+        const schema = {
+            enableBg: {
+                label: 'Enable Background',
+                value: enableBackground,
+                onChange: (value: boolean, _path: string, { initial }: { initial: boolean }) => {
+                    if (!initial) {
+                        setEnableBackground(value);
+                    }
+                },
+                transient: false,
+            },
+            Background: folder(
+                {
+                    backgroundSelect: {
+                        label: 'Available 360 Backgrounds',
+                        options: namedEnvironmentBackendAssetIdRecord,
+                        value: backgroundSelectValue,
+                        onChange: (value: FaderBackendAsset['id'], _path, { initial }) => {
+                            if (!initial) {
+                                setBackgroundSelectValue(value);
+                            }
+                        },
+                        transient: false,
+                    },
+                    Ground: folder(
+                        {
+                            enableGround: {
+                                label: 'Enable Ground',
+                                value: enableGround,
+                                onChange: (val: boolean, _path, { initial }) => {
+                                    !initial && setEnableGround(val);
+                                },
+                            },
+                            groundHeight: {
+                                label: 'Ground Height',
+                                value: groundYPos,
+                                min: -backgroundSphereRadius,
+                                max: backgroundSphereRadius,
+                                step: 1,
+                                onChange: (val: number, _path, { initial }) => {
+                                    !initial && setGroundYPos(val);
+                                },
+                                transient: false,
+                            },
+                            groundRadius: {
+                                label: 'Ground Radius',
+                                value: groundRadius,
+                                min: 0,
+                                max: backgroundSphereRadius + 100,
+                                onChange: (val: number, _path, { initial }) => {
+                                    !initial && setGroundRadius(val);
+                                },
+                                transient: false,
+                            },
+                        },
+                        {
+                            render: (get) => {
+                                const levaBackgroundSelectValue = get('Scene Background.Background.backgroundSelect') as string;
+                                const levaBackgroundSelectedBackendAsset = backendAssets[levaBackgroundSelectValue];
+
+                                if (!levaBackgroundSelectedBackendAsset) {
+                                    return false;
+                                } else {
+                                    if (levaBackgroundSelectedBackendAsset.media_type.includes('video')) {
+                                        return false;
+                                    } else {
+                                        return true;
+                                    }
+                                }
+                            },
+                        }
+                    ),
+                },
+                {
+                    render: (get) => get('Scene Background.enableBg') as boolean,
+                }
+            ),
+            Preset: folder({
+                presetSelect: {
+                    label: '3D Presets',
+                    options: { None: null },
+                    disabled: true,
+                    render: (get) => get('Scene Background.enableBg') as boolean,
+                },
+            }),
+        };
+
+        return schema;
+    }, dependencies);
 
     const levaOptionsSchema = {
         'Scene Background': folder(backgroundsFolderSchema as unknown as Schema),
     };
 
-    const dependencies = [enableBackground, backgroundSelectValue, enableGround, groundYPos, backendAssets];
-
-    const levaOptionsUseControls = useControls(() => levaOptionsSchema, { store }, dependencies);
+    const levaOptionsUseControls = useControls(() => levaOptionsSchema, { store }, [sceneId]);
 
     useEffect(() => {
         const updatedScene = cloneDeep(scene);
         updatedScene.data.environment.preset = enableBackground ? backgroundSelectValue : '';
         updatedScene.data.environment.enableGroundIn360 = enableGround;
         updatedScene.data.environment.positionY = groundYPos;
+        updatedScene.data.environment.radius = groundRadius;
 
         wrappers_UpdateSceneInLocalAndRemote(updatedScene);
     }, dependencies);
 
     return levaOptionsUseControls;
+};
+
+export const generateNamedBackendAssetIdRecord = (backendAssets: Record<FaderBackendAsset['id'], FaderBackendAsset>) => {
+    const recordNameAsset: Record<FaderBackendAsset['name'], FaderBackendAsset['id']> = {};
+
+    for (const key in backendAssets) {
+        const currentBackendAsset = backendAssets[key];
+
+        recordNameAsset[currentBackendAsset.name] = currentBackendAsset.id;
+    }
+
+    return recordNameAsset;
 };

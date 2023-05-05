@@ -1,25 +1,46 @@
 /** Used to feed default values onMount before backend data is dealt with */
 
-import { FaderSceneType, FaderStoryAssetType, FaderAssetGroupType, FaderSceneDataType, FaderStoryDataType } from '../types/FaderTypes';
+import {
+    FaderSceneType,
+    FaderSceneAssetType,
+    FaderAssetGroupType,
+    FaderSceneDataType,
+    FaderStoryDataType,
+    FaderAssetType,
+} from '../types/FaderTypes';
+
+/* Asset Consumption & Display */
+
+/* multiples of 16:9 */
+export const defaultCardWidth = 480;
+export const defaultCardHeight = 270;
+
+/* BG Sphere */
+export const backgroundSphereGeometryArgs: [number, number, number] = [100, 64, 64]; // first arg does sort of 'zoom' (sphere radius)
+
+/*/
 
 /* Stories and Scenes */
 
+export const arrayOfFaderAssetGroupTypes: FaderAssetGroupType[] = ['Video2D', 'SceneLink', 'Image2D', 'TextCard', 'Audio', '360'];
+export const arrayOfFaderAssetTypes: FaderAssetType[] = ['Video', 'SceneLink', 'Image', 'TextCard', 'Audio'];
+
 export const defaultSceneData: FaderSceneDataType = {
     assetIds: [],
-    assetOrderByGroup: {
-        '360': [],
-        'Audio': [],
-        'Image2D': [],
-        'Interactive': [],
-        'TextCard': [],
-        'Video2D': [],
-    },
+    assetOrderByGroup: (() => {
+        const assetGroupRecord: Partial<FaderSceneDataType['assetOrderByGroup']> = {};
+        arrayOfFaderAssetGroupTypes.forEach((assetGroupType) => {
+            assetGroupRecord[assetGroupType] = [];
+        });
+        return assetGroupRecord as FaderSceneDataType['assetOrderByGroup'];
+    })(),
     assets: {},
     environment: {
-        seed: 0,
-        preset: '',
-        positionY: 0,
         enableGroundIn360: false,
+        positionY: 0,
+        preset: '',
+        radius: backgroundSphereGeometryArgs[0],
+        seed: 0,
     },
     ui: {
         selectedAssetIdByGroup: {},
@@ -57,7 +78,7 @@ export const defaultProjectData: FaderStoryDataType = {
 
 /* Assets */
 
-export const defaultAssetProperties: FaderStoryAssetType['properties'] = {
+export const defaultAssetProperties: FaderSceneAssetType['properties'] = {
     positionX: 0,
     positionY: 0,
     positionZ: 10,
@@ -70,11 +91,11 @@ export const defaultAssetProperties: FaderStoryAssetType['properties'] = {
     scaleZ: 1, // see above
 };
 
-export const defaultAssetData: FaderStoryAssetType['data'] = {
+export const defaultAssetData: FaderSceneAssetType['data'] = {
     backgroundColor: '#222222' /* as above ^ */,
-    backgroundOn: false,
-    backgroundOpacity: 1,
-    body: '',
+    backgroundOn: true,
+    backgroundOpacity: 0.75,
+    body: 'Body Text!',
     cardHeight: 1,
     cardLevel: 1,
     cardWidth: 100,
@@ -83,17 +104,18 @@ export const defaultAssetData: FaderStoryAssetType['data'] = {
     frameOpacity: 1,
     headline: '',
     legacyInteractiveSize: true,
+    name: '',
     nextSceneId: '',
     textColor: '#ffffff' /* non-empty so leva understands this as a color field */,
 };
 
-export const defaultAssetDisplay: FaderStoryAssetType['display'] = {
+export const defaultAssetDisplay: FaderSceneAssetType['display'] = {
     caption: '',
     linkedBackendIds: [],
     showInteractive: false,
 };
 
-export const defaultAsset: FaderStoryAssetType = {
+export const defaultAsset: FaderSceneAssetType = {
     backendId: '',
     data: defaultAssetData,
     display: defaultAssetDisplay,
@@ -102,5 +124,3 @@ export const defaultAsset: FaderStoryAssetType = {
     properties: defaultAssetProperties,
     type: 'TextCard',
 };
-
-export const arrayOfFaderAssetGroupTypes: FaderAssetGroupType[] = ['Video2D', 'Interactive', 'Image2D', 'TextCard', 'Audio', '360'];

@@ -1,7 +1,8 @@
-import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderStoryAssetType } from '../types/FaderTypes';
+import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneAssetType } from '../types/FaderTypes';
+import { arrayOfFaderAssetGroupTypes, arrayOfFaderAssetTypes } from '../lib/defaults';
 
 /** Returns object with collection of `[id]: FaderStoryAsset` */
-export const filterStoryAssetsByType = (type: FaderAssetType, assets: Record<string, FaderStoryAssetType>) => {
+export const filterStoryAssetsByType = (type: FaderAssetType, assets: Record<string, FaderSceneAssetType>) => {
     const arrayFromAssetsByType = Object.entries(assets);
     const filteredArrayFromAssetsByType = arrayFromAssetsByType.filter(([_assetId, asset]) => asset.type === type);
     const returnObject = Object.fromEntries(filteredArrayFromAssetsByType);
@@ -12,7 +13,7 @@ export const filterStoryAssetsByType = (type: FaderAssetType, assets: Record<str
 /** Returns filtered object with collection of `[id]: FaderBackendAsset` */
 export const getBackendAssetsFromStoryAssetsByGroupType = (
     group: FaderAssetGroupType,
-    storyAssets: Record<string, FaderStoryAssetType>,
+    storyAssets: Record<string, FaderSceneAssetType>,
     backendAssets: Record<string, FaderBackendAsset>
 ) => {
     const returnObject: typeof backendAssets = {};
@@ -28,47 +29,14 @@ export const getBackendAssetsFromStoryAssetsByGroupType = (
     return returnObject;
 };
 
-/** Returns Record of `FaderBackendAsset`'s filtered by `FaderAssetType` */
-export const filterBackendAssetsByType = (type: FaderAssetType, backendAssets: Record<string, FaderBackendAsset>) => {
-    const returnObject: Record<FaderAssetType, Record<FaderBackendAsset['id'], FaderBackendAsset>> = {
-        Video: {},
-        Audio: {},
-        TextCard: {},
-        Image: {},
-        Interactive: {},
-    };
-
-    for (const key in backendAssets) {
-        const currentBackendAsset = backendAssets[key];
-
-        switch (backendAssets[key].media_type) {
-            case 'video/mp4':
-                // if (currentBackendAsset.attributes.width == currentBackendAsset.attributes.height * 2) {
-                //     //
-                // }
-                returnObject.Video[key] = currentBackendAsset;
-                break;
-
-            case 'image/jpeg':
-                returnObject.Image[key] = currentBackendAsset;
-                break;
-
-            default:
-                break;
-        }
-    }
-    //
-};
-
 export const getSortedBackendAssetsByGroupType = (backendAssets: Record<string, FaderBackendAsset>) => {
-    const returnObject: Record<FaderAssetGroupType, Record<FaderBackendAsset['id'], FaderBackendAsset>> = {
-        'Video2D': {},
-        'Audio': {},
-        'TextCard': {},
-        'Image2D': {},
-        'Interactive': {},
-        '360': {},
-    };
+    const returnGroupTypeObject = (() => {
+        const returnRecord: Partial<Record<FaderAssetGroupType, Record<FaderBackendAsset['id'], FaderBackendAsset>>> = {};
+        arrayOfFaderAssetGroupTypes.forEach((groupType) => {
+            returnRecord[groupType] = {};
+        });
+        return returnRecord as Record<FaderAssetGroupType, Record<FaderBackendAsset['id'], FaderBackendAsset>>;
+    })();
 
     for (const key in backendAssets) {
         const currentBackendAsset = backendAssets[key];
@@ -77,18 +45,18 @@ export const getSortedBackendAssetsByGroupType = (backendAssets: Record<string, 
             case 'video/mp4':
                 if (currentBackendAsset.attributes.width == currentBackendAsset.attributes.height * 2) {
                     // TODO need some other way of "finding" 360 video
-                    returnObject['360'][key] = currentBackendAsset;
+                    returnGroupTypeObject['360'][key] = currentBackendAsset;
                 } else {
-                    returnObject.Video2D[key] = currentBackendAsset;
+                    returnGroupTypeObject.Video2D[key] = currentBackendAsset;
                 }
                 break;
 
             case 'image/jpeg':
                 if (currentBackendAsset.attributes.width == currentBackendAsset.attributes.height * 2) {
                     // TODO this is a shoddy way of doing things - do we need a flag in Backend?
-                    returnObject['360'][key] = currentBackendAsset;
+                    returnGroupTypeObject['360'][key] = currentBackendAsset;
                 } else {
-                    returnObject.Image2D[key] = currentBackendAsset;
+                    returnGroupTypeObject.Image2D[key] = currentBackendAsset;
                 }
                 break;
 
@@ -97,5 +65,44 @@ export const getSortedBackendAssetsByGroupType = (backendAssets: Record<string, 
         }
     }
 
-    return returnObject;
+    return returnGroupTypeObject;
+};
+
+/** Sorts `FaderBackendAsset`'s into `FaderAssetType`'s by their `media_type` */
+export const getSortedBackendAssetsByType = (backendAssets: Record<string, FaderBackendAsset>) => {
+    const returnTypeObject = (() => {
+        const returnRecord: Partial<Record<FaderAssetType, Record<FaderBackendAsset['id'], FaderBackendAsset>>> = {};
+        arrayOfFaderAssetTypes.forEach((type) => {
+            returnRecord[type] = {};
+        });
+        return returnRecord as Record<FaderAssetType, Record<FaderBackendAsset['id'], FaderBackendAsset>>;
+    })();
+
+    for (const key in backendAssets) {
+        const currentBackendAsset = backendAssets[key];
+
+        const mediaType = backendAssets[key].media_type;
+
+        /* WARN This seems like it could break easily? At the least, likely need to filter away filetypes we cannot display/support? */
+        if (mediaType) {
+            switch (true) {
+                case mediaType.includes('video'):
+                    returnTypeObject.Video[key] = currentBackendAsset;
+                    break;
+
+                case mediaType.includes('image'):
+                    returnTypeObject.Image[key] = currentBackendAsset;
+                    break;
+
+                case mediaType.includes('audio'):
+                    returnTypeObject.Audio[key] = currentBackendAsset;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    return returnTypeObject;
 };

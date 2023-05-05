@@ -6,37 +6,40 @@ import { useRef, useEffect, useMemo, useCallback } from 'react';
 import { Camera } from 'three';
 import { wrappers_UpdateStoryAssetInStoreAndRemote } from '../../lib/api_and_store_wrappers';
 import useZustand from '../../lib/zustand/zustand';
+import { mergeHexAndOpacityValues } from '../../methods/colorHelpers';
 import { convertTRS } from '../../methods/convertTRS';
-import { useControlsWrapper } from '../../methods/useLevaControls';
-import { FaderBackendAsset, FaderSceneType, FaderStoryAssetType } from '../../types/FaderTypes';
+import { useControlsWrapperAssetProperties } from '../../methods/useLevaControls';
+import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../types/FaderTypes';
 import { LevaPanelOptions } from '../../types/ZustandTypes';
 
 type AssetProps = {
     scene: FaderSceneType;
-    asset: FaderStoryAssetType;
+    asset: FaderSceneAssetType;
     backendAsset?: FaderBackendAsset;
     assetJsxElement: (params: AssetJsxElementParams) => JSX.Element;
 };
 const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
     const cameraPos = useThree((state) => state.camera.position);
-    const assetPropertiesRef = useRef<FaderStoryAssetType['properties']>(asset.properties);
-    const assetDataRef = useRef<FaderStoryAssetType['data']>(asset.data);
+    const assetPropertiesRef = useRef<FaderSceneAssetType['properties']>(asset.properties);
+    const assetDataRef = useRef<FaderSceneAssetType['data']>(asset.data);
 
-    const levaPanels = useZustand((state) => state.fader.faderLevaPanels);
+    const levaSingleAssetPanels = useZustand((state) => state.fader.faderLevaPanels);
 
     const { storeAddLevaPanel } = useZustand((state) => state.methods);
 
     const store = useCreateStore();
-    useControlsWrapper({ asset, assetPropertiesRef, assetDataRef, store, scene });
+    useControlsWrapperAssetProperties({ asset, assetPropertiesRef, assetDataRef, store, scene });
 
     /* set initial Refs & Leva panel */
     useEffect(() => {
         assetPropertiesRef.current = asset.properties;
         assetDataRef.current = asset.data;
 
-        const levaPanelOptions = { id: asset.id, group: asset.group, store };
-        if (!containsObject(levaPanelOptions, levaPanels)) {
-            storeAddLevaPanel(levaPanelOptions);
+        const levaSingleAssetPanelOptions = { id: asset.id, group: asset.group, store };
+        if (containsObject(levaSingleAssetPanelOptions, levaSingleAssetPanels)) {
+            storeAddLevaPanel(levaSingleAssetPanelOptions, true);
+        } else {
+            storeAddLevaPanel(levaSingleAssetPanelOptions);
         }
     }, []);
 
@@ -50,7 +53,7 @@ const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
         data: { ...asset.data, ...assetDataRef.current },
     };
 
-    const debouncedAddOrUpdateStoryAsset = useCallback((updatedStoryAsset: FaderStoryAssetType) => {
+    const debouncedAddOrUpdateStoryAsset = useCallback((updatedStoryAsset: FaderSceneAssetType) => {
         const debounced = debounce(() => wrappers_UpdateStoryAssetInStoreAndRemote(updatedStoryAsset, scene), 666);
         debounced();
     }, []);
@@ -76,7 +79,36 @@ const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
             occlude={false}
             zIndexRange={[0, 1]}
         >
-            {assetJsxElement({ asset, assetDataRef, backendAsset })}
+            <div
+                id={asset.id}
+                className={'fader-3d-card h-full w-full'}
+                style={{
+                    color: assetDataRef.current.textColor,
+                    backgroundColor: assetDataRef.current.backgroundOn
+                        ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
+                        : 'transparent',
+                    border: `2px ${assetDataRef.current.frameOn ? 'solid' : 'none'} ${mergeHexAndOpacityValues(
+                        assetDataRef.current.frameColor,
+                        assetDataRef.current.frameOpacity
+                    )}`,
+                }}
+            >
+                {assetDataRef.current.headline && (
+                    <div
+                        id={`${asset.id} headline`}
+                        className='bold mb-1 w-full rounded p-1 px-2 text-lg'
+                        style={{
+                            backgroundColor: assetDataRef.current.backgroundOn
+                                ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
+                                : 'transparent',
+                        }}
+                    >
+                        {assetDataRef.current.headline}
+                    </div>
+                )}
+                {assetJsxElement({ asset, assetDataRef, backendAsset })}
+                {assetDataRef.current.body && <div id={`${asset.id} body`}>{assetDataRef.current.body}</div>}
+            </div>
         </Html>
     );
 };
@@ -84,9 +116,9 @@ const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
 export default Asset;
 
 export type AssetJsxElementParams = {
-    asset: FaderStoryAssetType;
+    asset: FaderSceneAssetType;
     backendAsset?: FaderBackendAsset;
-    assetDataRef: React.MutableRefObject<FaderStoryAssetType['data']>;
+    assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
 };
 
 /*
@@ -95,7 +127,7 @@ export type AssetJsxElementParams = {
 
 /** Wrapper for converting old-school Fader transforms to THREE space */
 function convertTRSMemoWrapper(
-    assetPropertiesRef: React.MutableRefObject<FaderStoryAssetType['properties']>,
+    assetPropertiesRef: React.MutableRefObject<FaderSceneAssetType['properties']>,
     cameraPos: Camera['position']
 ) {
     const currentRef = assetPropertiesRef.current;

@@ -4,6 +4,7 @@
         "password": "jVragments"
     },
     "dev": {
+        "devMode": true,
         "debugURLenabled": true
     }
 }

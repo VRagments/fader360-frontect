@@ -9,6 +9,7 @@ type ConfigType = {
         password: string | Falsey;
     };
     dev: {
+        devMode: boolean;
         debugURLenabled: boolean;
     };
 };

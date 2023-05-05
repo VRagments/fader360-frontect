@@ -1,5 +1,5 @@
 import { StoreType } from 'leva/dist/declarations/src/types';
-import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderStoryAssetType, FaderAssetGroupType } from './FaderTypes';
+import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderSceneAssetType, FaderAssetGroupType } from './FaderTypes';
 
 export interface ZustandState {
     siteData: {
@@ -17,10 +17,10 @@ export interface ZustandState {
         /** Store Assets associated with Scene */
         storeSetFaderStoryBackendAssets: (backendAssets: Record<string, FaderBackendAsset>) => void;
         /** Adds `storyAsset` to `scenes[sceneId]` by pushing to `.assetIds` and to `.assetOrderByGroup[storyAsset.group]` (creating an entry if the latter is missing) */
-        storeAddFaderStoryAssetToScene: (storyAsset: FaderStoryAssetType, sceneId: FaderSceneType['id']) => void;
-        storeUpdateFaderStoryAsset: (storyAsset: FaderStoryAssetType, sceneId: FaderSceneType['id']) => void;
-        storeDeleteFaderStoryAsset: (storyAsset: FaderStoryAssetType, sceneId: FaderSceneType['id']) => void;
-        storeAddLevaPanel: (levaPanel: LevaPanelOptions) => void;
+        storeAddFaderStoryAssetToScene: (storyAsset: FaderSceneAssetType, sceneId: FaderSceneType['id']) => void;
+        storeUpdateFaderStoryAsset: (storyAsset: FaderSceneAssetType, sceneId: FaderSceneType['id']) => void;
+        storeDeleteFaderStoryAsset: (storyAsset: FaderSceneAssetType, sceneId: FaderSceneType['id']) => void;
+        storeAddLevaPanel: (levaPanel: LevaPanelOptions, replace?: boolean) => void;
         storeSetFaderLevaOptionsStore: (optionsStore: StoreType) => void;
     };
     fader: {
@@ -32,4 +32,4 @@ export interface ZustandState {
     };
 }
 
-export type LevaPanelOptions = { id: FaderStoryAssetType['id']; group: FaderAssetGroupType; store: StoreType };
+export type LevaPanelOptions = { id: FaderSceneAssetType['id']; group: FaderAssetGroupType; store: StoreType };
