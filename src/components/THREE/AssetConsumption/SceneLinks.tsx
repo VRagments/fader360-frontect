@@ -1,12 +1,13 @@
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
-import Asset, { AssetJsxElementParams } from './Asset';
+import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
 
 type SceneLinksProps = {
     scene: FaderSceneType;
     storySceneLinkBackendAssets: Record<string, FaderBackendAsset>;
+    viewMode: boolean;
 };
 const SceneLinks = (props: SceneLinksProps) => {
-    const { scene, storySceneLinkBackendAssets } = props;
+    const { scene, storySceneLinkBackendAssets, viewMode } = props;
 
     return (
         <>
@@ -17,12 +18,13 @@ const SceneLinks = (props: SceneLinksProps) => {
                     const sceneLinkBackendAsset = storySceneLinkBackendAssets[sceneLinkAsset.backendId];
 
                     return (
-                        <Asset
+                        <AssetWrapper
                             key={`SceneLink ${sceneLinkId} / ${idx}`}
                             scene={scene}
                             asset={sceneLinkAsset}
                             backendAsset={sceneLinkBackendAsset}
                             assetJsxElement={SceneLinkJsxElement}
+                            viewMode={viewMode}
                         />
                     );
                 } else {

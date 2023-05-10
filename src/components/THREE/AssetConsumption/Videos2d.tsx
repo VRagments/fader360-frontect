@@ -1,16 +1,17 @@
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
-import Asset, { AssetJsxElementParams } from './Asset';
+import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
 import Hls from 'hls.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { defaultCardWidth, defaultCardHeight } from '../../../lib/defaults';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 
 type Videos2dProps = {
     scene: FaderSceneType;
     storyVideo2dBackendAssets: Record<string, FaderBackendAsset>;
+    viewMode: boolean;
 };
 const Videos2d = (props: Videos2dProps) => {
-    const { scene, storyVideo2dBackendAssets } = props;
+    const { scene, storyVideo2dBackendAssets, viewMode } = props;
 
     return (
         <>
@@ -28,12 +29,13 @@ const Videos2d = (props: Videos2dProps) => {
                         });
                     }
                     return (
-                        <Asset
+                        <AssetWrapper
                             key={`Video2d ${videoId} / ${idx}`}
                             scene={scene}
                             asset={videoAsset}
                             backendAsset={videoBackendAsset}
                             assetJsxElement={Video2dJsxElement}
+                            viewMode={viewMode}
                         />
                     );
                 } else {
@@ -51,24 +53,25 @@ const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
         return <></>;
     }
 
-    const videoRef = useRef<HTMLVideoElement>(null);
+    const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
     const hls = useRef({ hls: new Hls(), videoSource: backendAsset.static_url });
 
     useEffect(() => {
-        if (videoRef.current) {
+        if (videoRef) {
             /* Once videoRefs have been set:  */
             hls.current.hls.loadSource(hls.current.videoSource);
-            hls.current.hls.attachMedia(videoRef.current);
+            hls.current.hls.attachMedia(videoRef);
 
             hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
-                throw new Error(`${event}, ${data}`);
+                // eslint-disable-next-line no-console
+                console.error(`${event}, ${data}`);
             });
         }
-    }, [videoRef.current]);
+    }, [videoRef]);
 
     return (
         <video
-            ref={videoRef}
+            ref={setVideoRef}
             controls
             playsInline
             preload='auto'

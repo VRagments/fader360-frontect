@@ -9,18 +9,19 @@ import {
 import { backgroundSphereGeometryArgs } from '../defaults';
 import useZustand from '../zustand/zustand';
 import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../types/FaderTypes';
-import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType, setSceneOrderOfScene } from '../../methods/faderHelpers';
+import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType, setSceneOrderOfScene } from '../methods/faderHelpers';
 
 type UseControlsWrapperAssetPropertiesParams = {
     asset: FaderSceneAssetType;
-    assetPropertiesRef: React.MutableRefObject<FaderSceneAssetType['properties']>;
+    assetPropertiesState: [FaderSceneAssetType['properties'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['properties']>>];
     assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
     store?: StoreType;
     scene?: FaderSceneType;
 };
 export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAssetPropertiesParams) => {
     /** Instead of using setState and syncing to remote in a useEffect, the passed-in Refs are mutated (as they are 'watched'/synced in <Asset>) */
-    const { asset, assetPropertiesRef, assetDataRef, store, scene } = params;
+    const { asset, assetPropertiesState, assetDataRef, store, scene } = params;
+    const [assetProperties, setAssetProperties] = assetPropertiesState;
 
     const imageContent = {
         /* TODO this will need a custom plugin to display Files from a FaderStory's associated asset list (and also for audio/video/etc) */
@@ -96,39 +97,39 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             {
                 posVertical: {
                     label: 'Vertical',
-                    value: assetPropertiesRef.current.rotationX,
+                    value: assetProperties.rotationX,
                     min: -180,
                     max: 180,
                     step: 0.5,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetPropertiesRef.current = { ...assetPropertiesRef.current, rotationX: val };
+                            setAssetProperties({ ...assetProperties, rotationX: val });
                         }
                     },
                     transient: false,
                 },
                 posHorizontal: {
                     label: 'Horizontal',
-                    value: assetPropertiesRef.current.rotationY,
+                    value: assetProperties.rotationY,
                     min: -180,
                     max: 180,
                     step: 0.5,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetPropertiesRef.current = { ...assetPropertiesRef.current, rotationY: val };
+                            setAssetProperties({ ...assetProperties, rotationY: val });
                         }
                     },
                     transient: false,
                 },
                 posDistance: {
                     label: 'Distance',
-                    value: assetPropertiesRef.current.positionZ,
+                    value: assetProperties.positionZ,
                     min: 0, // for now, in order to handle minus values coming in from old backend.
                     max: backgroundSphereGeometryArgs[0],
                     step: 1,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetPropertiesRef.current = { ...assetPropertiesRef.current, positionZ: val };
+                            setAssetProperties({ ...assetProperties, positionZ: val });
                         }
                     },
                     transient: false,
@@ -140,13 +141,13 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             {
                 rotTilt: {
                     label: 'Tilt',
-                    value: assetPropertiesRef.current.rotationZ,
+                    value: assetProperties.rotationZ,
                     min: -180,
                     max: 180,
                     step: 0.5,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetPropertiesRef.current = { ...assetPropertiesRef.current, rotationZ: val };
+                            setAssetProperties({ ...assetProperties, rotationZ: val });
                         }
                     },
                     transient: false,
@@ -158,13 +159,13 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             {
                 scale: {
                     label: 'Scale',
-                    value: assetPropertiesRef.current.scale,
+                    value: assetProperties.scale,
                     min: 0.1, // for now, in order to handle minus values coming in from old backend.
                     max: 10,
                     step: 0.1,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetPropertiesRef.current = { ...assetPropertiesRef.current, scale: val };
+                            setAssetProperties({ ...assetProperties, scale: val });
                         }
                     },
                     transient: false,
@@ -283,7 +284,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
         ),
     };
 
-    return useControls(() => defaultControls, { store });
+    return useControls(() => defaultControls, { store }, [assetProperties]);
 };
 
 const backgroundSphereRadius = backgroundSphereGeometryArgs[0];
@@ -301,7 +302,7 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
 
     const namedEnvironmentBackendAssetIdRecord = useMemo(
         () =>
-            generateNamedBackendAssetIdRecord({
+            generateRecordOfNamedBackendAssetIds({
                 ...getSortedBackendAssetsByType(backendAssets)['Video'],
                 ...getSortedBackendAssetsByType(backendAssets)['Image'],
             }),
@@ -338,6 +339,7 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
         scenesOrderIndex: useState(currentScenePlaceInSceneOrder),
     };
 
+    /* define dependencies for Leva to watch: */
     const dependencies = Object.values(allUseStates).map((value) => value[0]);
 
     const {
@@ -459,6 +461,8 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                         onChange: (val: boolean, _path, { initial }) => {
                             !initial && setEnableGround(val);
                         },
+                        render: () =>
+                            backgroundSelectValue && backendAssets[backgroundSelectValue].media_type.includes('video') ? false : true,
                     },
                     Ground: folder(
                         {
@@ -504,7 +508,7 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
         };
 
         return schema;
-    }, dependencies);
+    }, []);
 
     const levaOptionsSchema = {
         'Scene Options': folder(sceneFolderSchema as unknown as Schema, { collapsed: false }),
@@ -532,16 +536,16 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                 ...updatedData,
                 environment: updatedEnvironment,
             },
+            duration: sceneDuration,
+            name: sceneName,
+            navigatable: sceneNavigatable,
         };
-
-        sceneUpdated.name = sceneName;
-        sceneUpdated.duration = sceneDuration;
-        sceneUpdated.navigatable = sceneNavigatable;
 
         wrappers_UpdateSceneInLocalAndRemote(sceneUpdated);
 
-        /* Update properties of FaderStory: */
+        /* Update any properties of FaderStory: */
         const newSceneOrder = setSceneOrderOfScene(faderScenesOrder, scene.id, scenesOrderIndex);
+
         wrappers_SetStoryToStoreAndRemote({
             ...faderStory!,
             data: {
@@ -554,14 +558,14 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
     return levaOptionsUseControls;
 };
 
-export const generateNamedBackendAssetIdRecord = (backendAssets: Record<FaderBackendAsset['id'], FaderBackendAsset>) => {
-    const recordNameAsset: Record<FaderBackendAsset['name'], FaderBackendAsset['id']> = {};
+export const generateRecordOfNamedBackendAssetIds = (backendAssets: Record<FaderBackendAsset['id'], FaderBackendAsset>) => {
+    const recordOfNamedBackendAssetIds: Record<FaderBackendAsset['name'], FaderBackendAsset['id']> = {};
 
     for (const key in backendAssets) {
         const currentBackendAsset = backendAssets[key];
 
-        recordNameAsset[currentBackendAsset.name] = currentBackendAsset.id;
+        recordOfNamedBackendAssetIds[currentBackendAsset.name] = currentBackendAsset.id;
     }
 
-    return recordNameAsset;
+    return recordOfNamedBackendAssetIds;
 };

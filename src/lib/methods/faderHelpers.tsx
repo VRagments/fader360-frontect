@@ -1,5 +1,5 @@
-import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneAssetType, FaderSceneType } from '../types/FaderTypes';
-import { arrayOfFaderAssetGroupTypes, arrayOfFaderAssetTypes } from '../lib/defaults';
+import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneAssetType, FaderSceneType } from '../../types/FaderTypes';
+import { arrayOfFaderAssetGroupTypes, arrayOfFaderAssetTypes } from '../defaults';
 
 /** Returns object with collection of `[id]: FaderStoryAsset` */
 export const filterStoryAssetsByType = (type: FaderAssetType, assets: Record<string, FaderSceneAssetType>) => {

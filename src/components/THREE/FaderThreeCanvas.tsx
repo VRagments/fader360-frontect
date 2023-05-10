@@ -10,10 +10,11 @@ import { backgroundSphereGeometryArgs } from '../../lib/defaults';
 
 type FaderThreeCanvasProps = {
     scene: FaderSceneType;
+    viewMode: boolean;
     debug?: boolean;
 };
 const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
-    const { scene, debug = false } = props;
+    const { scene, viewMode, debug = false } = props;
     const faderStory = useZustand((state) => state.fader.faderStory);
 
     if (!faderStory) {
@@ -46,7 +47,7 @@ const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
                     />
                 </OrbitControls>
 
-                <FaderScene currentScene={scene} />
+                <FaderScene currentScene={scene} viewMode={viewMode} />
 
                 {scene.data.enableGrid && <Grid />}
 

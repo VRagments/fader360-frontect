@@ -1,15 +1,16 @@
 import Hls from 'hls.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
-import Asset, { AssetJsxElementParams } from './Asset';
+import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
 
 type AudiosProps = {
     scene: FaderSceneType;
     storyAudioBackendAssets: Record<string, FaderBackendAsset>;
+    viewMode: boolean;
 };
 const Audios = (props: AudiosProps) => {
-    const { scene, storyAudioBackendAssets } = props;
+    const { scene, storyAudioBackendAssets, viewMode } = props;
 
     return (
         <>
@@ -32,12 +33,13 @@ const Audios = (props: AudiosProps) => {
                     }
 
                     return (
-                        <Asset
+                        <AssetWrapper
                             key={`Audio ${audioId} / ${idx}`}
                             scene={scene}
                             asset={audioAsset}
                             backendAsset={audioBackendAsset}
                             assetJsxElement={AudioJsxElement}
+                            viewMode={viewMode}
                         />
                     );
                 } else {
@@ -51,27 +53,29 @@ const Audios = (props: AudiosProps) => {
 export default Audios;
 
 const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
     const hls = useRef({ hls: new Hls(), audioSource: backendAsset?.static_url });
+    const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        if (audioRef.current) {
+        if (audioRef) {
             /* Once audioRefs have been set:  */
             hls.current.hls.loadSource(hls.current.audioSource as string);
-            hls.current.hls.attachMedia(audioRef.current);
+            hls.current.hls.attachMedia(audioRef);
 
             hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
-                throw new Error(`${event}, ${data}`);
+                // eslint-disable-next-line no-console
+                console.error(`${event}, ${data}`);
             });
         }
-    }, [audioRef.current]);
+    }, [audioRef]);
 
     if (!backendAsset || !Hls.isSupported()) {
         return <></>;
     } else {
         return (
             <audio
-                ref={audioRef}
+                /* set reference to element via setAudioRef callback: */
+                ref={setAudioRef}
                 className='block '
                 controls
                 autoPlay={asset.data.autoPlay}

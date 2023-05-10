@@ -5,8 +5,8 @@ import { wrappers_AddNewAssetToSceneStoreAndRemote } from '../../lib/api_and_sto
 import { groupAndTypeLinks } from '../../lib/createAsset';
 import { arrayOfFaderAssetGroupTypes } from '../../lib/defaults';
 import useZustand from '../../lib/zustand/zustand';
-import { getSortedBackendAssetsByType } from '../../methods/faderHelpers';
-import { generateNamedBackendAssetIdRecord } from '../../lib/hooks/useLevaControls';
+import { getSortedBackendAssetsByType } from '../../lib/methods/faderHelpers';
+import { generateRecordOfNamedBackendAssetIds } from '../../lib/hooks/useLevaControls';
 import { levaThemeValues, levaValuesForTw } from '../../style/levaTheme';
 import { FaderAssetGroupType, FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
 import AddAsset from './AddAsset';
@@ -111,7 +111,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
             const type = groupAndTypeLinks[groupType];
             if (type) {
                 const sortedBackendAssetsByType = getSortedBackendAssetsByType(backendAssets)[type];
-                const namedRecord = generateNamedBackendAssetIdRecord(sortedBackendAssetsByType);
+                const namedRecord = generateRecordOfNamedBackendAssetIds(sortedBackendAssetsByType);
                 return namedRecord;
             }
         },

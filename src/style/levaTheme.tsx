@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars,  @typescript-eslint/no-unsafe-member-access */
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { hexBgColorToTwRgbColor } from '../methods/colorHelpers';
+import { hexBgColorToTwRgbColor } from '../lib/methods/colorHelpers';
 import tailwindConfig from '../tailwind.config.js';
 
 const tailwindConfigTheme = resolveConfig(tailwindConfig).theme;

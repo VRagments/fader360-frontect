@@ -1,11 +1,12 @@
 import { FaderSceneType } from '../../../types/FaderTypes';
-import Asset from './Asset';
+import AssetWrapper from './AssetWrapper';
 
 type TextCardsProps = {
     scene: FaderSceneType;
+    viewMode: boolean;
 };
 const TextCards = (props: TextCardsProps) => {
-    const { scene } = props;
+    const { scene, viewMode } = props;
 
     return (
         <>
@@ -14,11 +15,12 @@ const TextCards = (props: TextCardsProps) => {
 
                 if (textCardAsset) {
                     return (
-                        <Asset
+                        <AssetWrapper
                             key={`TextCard ${textCardId} / ${idx}`}
                             scene={scene}
                             asset={textCardAsset}
                             assetJsxElement={TextCardJsxElement}
+                            viewMode={viewMode}
                         />
                     );
                 } else {

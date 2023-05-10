@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import useZustand from '../../lib/zustand/zustand';
-import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType } from '../../methods/faderHelpers';
+import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType } from '../../lib/methods/faderHelpers';
 import { FaderSceneType } from '../../types/FaderTypes';
 import Audios from './AssetConsumption/Audios';
 import Environments from './AssetConsumption/Environments';
@@ -12,9 +12,10 @@ import Background from './Background/Background';
 
 type FaderSceneProps = {
     currentScene: FaderSceneType;
+    viewMode: boolean;
 };
 export const FaderScene = (props: FaderSceneProps) => {
-    const { currentScene } = props;
+    const { currentScene, viewMode } = props;
     const faderStoryBackendAssets = useZustand((state) => state.fader.faderStoryBackendAssets);
 
     if (!currentScene.data.assetOrderByGroup) {
@@ -42,9 +43,10 @@ export const FaderScene = (props: FaderSceneProps) => {
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}
+                    viewMode={viewMode}
                 />
             )}
-            {currentScene.data.assetOrderByGroup.TextCard?.length && <TextCards scene={currentScene} />}
+            {currentScene.data.assetOrderByGroup.TextCard?.length && <TextCards scene={currentScene} viewMode={viewMode} />}
             {currentScene.data.assetOrderByGroup.Image2D?.length && (
                 <Images2d
                     scene={currentScene}
@@ -53,6 +55,7 @@ export const FaderScene = (props: FaderSceneProps) => {
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}
+                    viewMode={viewMode}
                 />
             )}
             {currentScene.data.assetOrderByGroup.Video2D?.length && (
@@ -63,6 +66,7 @@ export const FaderScene = (props: FaderSceneProps) => {
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}
+                    viewMode={viewMode}
                 />
             )}
             {currentScene.data.assetOrderByGroup.Audio?.length && (
@@ -73,6 +77,7 @@ export const FaderScene = (props: FaderSceneProps) => {
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}
+                    viewMode={viewMode}
                 />
             )}
             {currentScene.data.assetOrderByGroup.SceneLink?.length && (
@@ -83,6 +88,7 @@ export const FaderScene = (props: FaderSceneProps) => {
                         currentScene.data.assets,
                         faderStoryBackendAssets
                     )}
+                    viewMode={viewMode}
                 />
             )}
         </group>

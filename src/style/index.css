@@ -20,7 +20,7 @@ code {
 }
 
 .progress-bar {
-    @apply -mb-2 flex h-full w-0 flex-row justify-start bg-orange-500/70 transition-[width] delay-0 duration-500 ease-out;
+    @apply -mb-2 flex h-full w-0 flex-row justify-start bg-orange-500/70 transition-[width] delay-[0s] duration-500 ease-out;
 }
 
 /* WARN Since transform3d() is rendered as WebGPU textures, this will affect performance by doubling the texture size? */

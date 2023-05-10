@@ -32,7 +32,6 @@ export const api_ListBackendAssetsAssociatedWithProject = async (project_id: str
     return await api
         .get(`${apiBaseUrl}/projects/${project_id}/assets`)
         .then((result: AxiosResponse<ApiListResponse<FaderBackendAsset>>) => {
-            console.log('%c[axios]', 'color: #311c15', `result.data.objects :`, result.data.objects);
             return result.data.objects;
         })
         .catch((err) => handleAxiosError(err, 'GET api_ListBackendAssetsAssociatedWithProject'));

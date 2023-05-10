@@ -12,7 +12,7 @@ type OptionsPanelProps = {
 const OptionsPanel = ({ setOpenPanel, currentScene }: OptionsPanelProps) => {
     const faderLevaOptionsStore = useZustand((state) => state.fader.faderLevaOptionsStore);
 
-    useControlsWrapperSceneOptions(faderLevaOptionsStore!, currentScene);
+    faderLevaOptionsStore && useControlsWrapperSceneOptions(faderLevaOptionsStore, currentScene);
 
     return (
         <div

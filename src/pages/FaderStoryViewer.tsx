@@ -121,8 +121,8 @@ const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                 </div>
 
                 {faderStory.preview_image && (
-                    <div className='absolute top-0 mx-auto w-full p-8 drop-shadow-2xl'>
-                        <img className='m-auto max-h-[90%] w-4/5 rounded-lg object-scale-down' src={faderStory.preview_image} />
+                    <div className='flex h-full w-full items-center justify-center drop-shadow-2xl'>
+                        <img className='rounded-lg object-scale-down' src={faderStory.preview_image} />
                     </div>
                 )}
             </div>
@@ -133,7 +133,7 @@ const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
             <div className='relative flex-1 bg-slate-800'>
                 {faderScenes[currentSceneId] ? (
                     <div className='h-full w-full'>
-                        <FaderThreeCanvas scene={faderScenes[currentSceneId]} />
+                        <FaderThreeCanvas scene={faderScenes[currentSceneId]} viewMode={true} />
                     </div>
                 ) : (
                     <>

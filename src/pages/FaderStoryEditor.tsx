@@ -48,21 +48,28 @@ const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
     if (!storyId) {
         return <div className='text-slate-300'>No Story id provided!</div>;
     } else if (!faderStory) {
-        return <div className='text-slate-300'>Cannot load Story data!</div>;
+        return (
+            <div className='text-slate-300'>
+                Cannot load Story data! Are you sure you're logged in?
+                <br />
+                <br />
+                <a href={`view/?project_id=${storyId}`}>View this Story</a>
+            </div>
+        );
     } else if (!faderScenes) {
         return <div className='text-slate-300'>Cannot load Scenes, does this FaderStory have any Scenes created?</div>;
     } else {
         return (
-            <div className='relative flex-1 bg-slate-800'>
+            <div className='relative h-full w-full flex-1 bg-slate-800'>
                 {faderScenes[currentSceneId] ? (
                     <div ref={faderThreeCanvasParentRef} className='h-full w-full'>
-                        <FaderThreeCanvas scene={faderScenes[currentSceneId]} debug={debug} />
+                        <FaderThreeCanvas scene={faderScenes[currentSceneId]} viewMode={false} debug={debug} />
                     </div>
                 ) : (
                     <>
                         {faderStory.preview_image && (
-                            <div className='absolute w-full p-8 drop-shadow-2xl'>
-                                <img className='m-auto max-h-[90%] w-4/5 rounded-lg object-scale-down' src={faderStory.preview_image} />
+                            <div className='flex h-full w-full items-center justify-center drop-shadow-2xl'>
+                                <img className='rounded-lg object-scale-down' src={faderStory.preview_image} />
                             </div>
                         )}
                     </>
