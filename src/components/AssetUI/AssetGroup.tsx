@@ -1,3 +1,4 @@
+import { levaValuesForTw } from '../../style/levaTheme';
 import { FaderAssetGroupType, FaderSceneDataType } from '../../types/FaderTypes';
 
 type AssetGroupProps = {
@@ -8,7 +9,8 @@ type AssetGroupProps = {
 const AssetGroup = ({ assetGroup, sceneAssets, selectedAssetState }: AssetGroupProps) => {
     const [selectedAssetId, setSelectedAssetId] = selectedAssetState;
 
-    const standardClasses = 'cursor-pointer self-start px-2 text-[11px] hover:bg-orange-600 rounded-sm border-2 mt-1 mr-4 mx-1 w-full';
+    const standardClasses =
+        'cursor-pointer self-start px-2 hover:bg-orange-400 rounded-sm border-2 mt-1 mr-4 mx-1 w-full' + levaValuesForTw.fontSizes.root;
     const inactiveClasses = 'bg-slate-200 border-slate-200 hover:border-orange-600';
     const activeClasses = 'bg-orange-500 border-orange-600 text-slate-200';
 

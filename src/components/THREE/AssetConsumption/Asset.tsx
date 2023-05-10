@@ -4,13 +4,13 @@ import { useCreateStore } from 'leva';
 import { debounce } from 'lodash';
 import { useRef, useEffect, useMemo, useCallback } from 'react';
 import { Camera } from 'three';
-import { wrappers_UpdateStoryAssetInStoreAndRemote } from '../../lib/api_and_store_wrappers';
-import useZustand from '../../lib/zustand/zustand';
-import { mergeHexAndOpacityValues } from '../../methods/colorHelpers';
-import { convertTRS } from '../../methods/convertTRS';
-import { useControlsWrapperAssetProperties } from '../../methods/useLevaControls';
-import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../types/FaderTypes';
-import { LevaPanelOptions } from '../../types/ZustandTypes';
+import { wrappers_UpdateStoryAssetInStoreAndRemote } from '../../../lib/api_and_store_wrappers';
+import useZustand from '../../../lib/zustand/zustand';
+import { mergeHexAndOpacityValues } from '../../../methods/colorHelpers';
+import { convertTRS } from '../../../methods/convertTRS';
+import { useControlsWrapperAssetProperties } from '../../../lib/hooks/useLevaControls';
+import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../../types/FaderTypes';
+import { LevaPanelOptions } from '../../../types/ZustandTypes';
 
 type AssetProps = {
     scene: FaderSceneType;
@@ -46,28 +46,44 @@ const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
     /* Memoize transform calculations, update on properties change */
     const convertedTRSMemoized = useMemo(() => convertTRSMemoWrapper(assetPropertiesRef, cameraPos), [assetPropertiesRef.current]);
 
-    /* <-- begin story asset edit routine (update store/remote from leva panel values) */
+    /*
+     *  <-- begin story asset edit routine (update store/remote from leva panel values)
+     */
     let updatedStoryAsset = {
         ...asset,
         properties: { ...asset.properties, ...assetPropertiesRef.current },
         data: { ...asset.data, ...assetDataRef.current },
     };
 
-    const debouncedAddOrUpdateStoryAsset = useCallback((updatedStoryAsset: FaderSceneAssetType) => {
-        const debounced = debounce(() => wrappers_UpdateStoryAssetInStoreAndRemote(updatedStoryAsset, scene), 666);
-        debounced();
-    }, []);
+    const debouncedAddOrUpdateStoryAsset = useCallback(
+        (updatedStoryAsset: FaderSceneAssetType) => {
+            const debounced = debounce(() => wrappers_UpdateStoryAssetInStoreAndRemote(updatedStoryAsset, scene), 666);
+            debounced();
+        },
+        [updatedStoryAsset]
+    );
 
+    /* Debouncing changes to asset properties (as these are likely quickly changing TRS values) */
     useEffect(() => {
         updatedStoryAsset = {
             ...asset,
             properties: { ...asset.properties, ...assetPropertiesRef.current },
-            data: { ...asset.data, ...assetDataRef.current },
         };
 
         debouncedAddOrUpdateStoryAsset(updatedStoryAsset);
-    }, [assetPropertiesRef.current, assetDataRef.current]);
-    /* end --> */
+    }, [assetPropertiesRef.current]);
+
+    useEffect(() => {
+        updatedStoryAsset = {
+            ...asset,
+            data: { ...asset.data, ...assetDataRef.current },
+        };
+
+        wrappers_UpdateStoryAssetInStoreAndRemote(updatedStoryAsset, scene);
+    }, [assetDataRef.current]);
+    /*
+     * end -->
+     */
 
     return (
         <Html
@@ -76,12 +92,14 @@ const Asset = ({ scene, asset, backendAsset, assetJsxElement }: AssetProps) => {
             rotation={convertedTRSMemoized.rotationConverted}
             scale={convertedTRSMemoized.scaleConverted}
             transform
+            // distanceFactor={10}
             occlude={false}
-            zIndexRange={[0, 1]}
+            zIndexRange={[10, 0]}
+            wrapperClass='html-component-blurriness-hack'
         >
             <div
                 id={asset.id}
-                className={'fader-3d-card h-full w-full'}
+                className='fader-3d-card'
                 style={{
                     color: assetDataRef.current.textColor,
                     backgroundColor: assetDataRef.current.backgroundOn

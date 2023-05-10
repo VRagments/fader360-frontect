@@ -46,12 +46,13 @@ export const defaultSceneData: FaderSceneDataType = {
         selectedAssetIdByGroup: {},
         selectedAssetGroup: 'TextCard',
     },
+    enableGrid: true,
 };
 
 export const defaultScene: FaderSceneType = {
     created_at: '',
     data: defaultSceneData,
-    duration: 0,
+    duration: '12',
     id: '',
     name: '',
     navigatable: false,
@@ -92,6 +93,7 @@ export const defaultAssetProperties: FaderSceneAssetType['properties'] = {
 };
 
 export const defaultAssetData: FaderSceneAssetType['data'] = {
+    autoPlay: true,
     backgroundColor: '#222222' /* as above ^ */,
     backgroundOn: true,
     backgroundOpacity: 0.75,
@@ -104,6 +106,7 @@ export const defaultAssetData: FaderSceneAssetType['data'] = {
     frameOpacity: 1,
     headline: '',
     legacyInteractiveSize: true,
+    loop: false,
     name: '',
     nextSceneId: '',
     textColor: '#ffffff' /* non-empty so leva understands this as a color field */,

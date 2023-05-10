@@ -1,4 +1,4 @@
-import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
+import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import Asset from './Asset';
 
 /* TODO Expand to also use GLTF backgrounds */

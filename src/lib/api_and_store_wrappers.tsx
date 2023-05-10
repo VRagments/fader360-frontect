@@ -3,10 +3,11 @@ import { faderNestedObjectKeysAreEqual, syncProjectData, syncSceneData } from '.
 import { FaderBackendAsset, FaderAssetGroupType, FaderSceneType, FaderSceneAssetType, FaderStoryType } from '../types/FaderTypes';
 import {
     api_ListBackendAssetsAssociatedWithProject,
-    api_ListProjects,
+    api_ListBackendAssetsAssociatedWithPublicProject,
     api_ListProjectScenes,
-    api_RequestAuthToken,
+    api_ListPublicProjectScenes,
     api_ShowProject,
+    api_ShowPublicProject,
     api_UpdateProject,
     api_UpdateScene,
 } from './axios';
@@ -16,28 +17,24 @@ import buildConfig from '../buildConfig';
 
 const devMode = buildConfig.dev.devMode;
 
-const { storeDeleteFaderStoryAsset, storeAddFaderStoryAssetToScene, storeUpdateFaderStoryAsset, storeUpdateFaderScene } =
-    useZustand.getState().methods;
-
-/** Requests Auth Token from Api, sends to Zustand */
-export const wrappers_AuthTokenToStore = async (userLoginData: { username: string; password: string }) => {
-    const storeSetApiAuthToken = useZustand.getState().methods.storeSetApiAuthToken;
-
-    const authToken = await api_RequestAuthToken(userLoginData).then((result) => result);
-    storeSetApiAuthToken(authToken as unknown as string);
-};
+const {
+    storeSetCurrentSceneId,
+    storeDeleteFaderStoryAsset,
+    storeAddFaderStoryAssetToScene,
+    storeUpdateFaderStoryAsset,
+    storeUpdateFaderScene,
+    storeSetFaderStory,
+} = useZustand.getState().methods;
 
 /** Requests a Project/FaderStory & its Scenes & associated BackendAssets, fills .data fields if need be, sends to Zustand */
-export const wrappers_FirstProjectInitAndSendToStore = async () => {
+export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: string) => {
     const { storeSetFaderStory, storeSetFaderScenes, storeSetFaderStoryBackendAssets } = useZustand.getState().methods;
 
-    /*  
-        Get Project (first in list for now).
+    /*  1.
+        Get Project
         If .data field is empty/incomplete, add default properties.
     */
-    const projects = await api_ListProjects().then((result) => result);
-    const firstProjectId = (projects as FaderStoryType[])[0].id; // TODO Only ever need one Project, id will likely be passed in externally
-    const firstProject = (await api_ShowProject(firstProjectId)) as FaderStoryType;
+    const firstProject = (await api_ShowProject(sceneIdParam)) as FaderStoryType;
 
     if (
         !Object.keys(firstProject.data).length ||
@@ -54,16 +51,17 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
         firstProject.data = syncProjectData(firstProject.data);
     }
 
-    /*  
+    /*  2.
         Get FaderScene's associated with FaderStory.
         If their .data fields are null (so an empty scene), add default data fields. 
         Then send to store (fader.faderScenes) .
     */
-    const allProjectScenes = (await api_ListProjectScenes(firstProjectId)) as FaderSceneType[];
+    const allProjectScenes = (await api_ListProjectScenes(sceneIdParam)) as FaderSceneType[];
     if (allProjectScenes.length === 0) {
-        throw new Error('FaderStory has no associated Scenes!');
+        // eslint-disable-next-line no-console
+        console.error('FaderStory has no associated Scenes!');
     } else {
-        allProjectScenes.forEach((projectScene, idx) => {
+        allProjectScenes.forEach((projectScene) => {
             if (
                 !Object.keys(projectScene.data).length ||
                 !faderNestedObjectKeysAreEqual({
@@ -85,7 +83,7 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
                 api_UpdateScene(projectScene).catch((e: string) => new Error(e));
             }
 
-            if (firstProject.data.sceneOrder.length == idx) {
+            if (!firstProject.data.sceneOrder.includes(projectScene.id)) {
                 firstProject.data.sceneOrder.push(projectScene.id);
             }
         });
@@ -94,17 +92,21 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
         storeSetFaderScenes(scenes);
     }
 
-    /*  
+    /* Sync incoming allProjectScenes with existing sceneOrder: */
+    const syncedSceneOrder = firstProject.data.sceneOrder.filter((sceneId) => allProjectScenes.some((scene) => scene.id == sceneId));
+    firstProject.data.sceneOrder = syncedSceneOrder;
+
+    /*  3.
         Get a project's backend assets.
         Add to project .data.uploadedAssetIds
         Send to store (fader.faderStoryBackendAssets).
     */
-    const projectBackendAssets = (await api_ListBackendAssetsAssociatedWithProject(firstProjectId)) as FaderBackendAsset[];
+    const projectBackendAssets = (await api_ListBackendAssetsAssociatedWithProject(sceneIdParam)) as FaderBackendAsset[];
     const backendAssets = arrayToRecordOfIds(projectBackendAssets);
     storeSetFaderStoryBackendAssets(backendAssets);
 
     if (projectBackendAssets.length > 0) {
-        // removeDuplicatesInArray(firstProject.data.uploadedAssetIds)
+        // firstProject.data.uploadedAssetIds = removeDuplicatesInArray(firstProject.data.uploadedAssetIds) as string[];
 
         projectBackendAssets.forEach((backendAsset) => {
             if (!firstProject.data.uploadedAssetIds.includes(backendAsset.id)) {
@@ -113,11 +115,41 @@ export const wrappers_FirstProjectInitAndSendToStore = async () => {
         });
     }
 
-    /* Send ready Project to store */
+    /* 4. Send ready Project to store */
     storeSetFaderStory(firstProject);
 
-    /* And to remote */
-    await api_UpdateProject(firstProjectId, firstProject);
+    /* 5. And to remote */
+    await api_UpdateProject(sceneIdParam, firstProject);
+};
+
+/** Requests a PUBLIC Project/FaderStory & its Scenes & associated BackendAssets & sends to Zustand. Does not mutate incoming data in any form, so technically prone to errors in api "versions" I guess? */
+export const wrappers_ViewerProjectSyncToStore = async (storyIdParam: FaderStoryType['id']) => {
+    const { storeSetFaderStory, storeSetFaderScenes, storeSetFaderStoryBackendAssets } = useZustand.getState().methods;
+
+    /*  1.
+        Get Project, send to Store
+    */
+    const firstProject = (await api_ShowPublicProject(storyIdParam)) as FaderStoryType;
+    storeSetFaderStory(firstProject);
+
+    /*  2.
+        Get FaderScene's associated with FaderStory, send to store (fader.faderScenes) .
+    */
+    const allProjectScenes = (await api_ListPublicProjectScenes(storyIdParam)) as FaderSceneType[];
+    if (allProjectScenes.length === 0) {
+        throw new Error('FaderStory has no associated Scenes!');
+    }
+
+    const scenes = arrayToRecordOfIds(allProjectScenes);
+    storeSetFaderScenes(scenes);
+
+    /*  3.
+        Get a project's backend assets, send to store (fader.faderStoryBackendAssets).
+    */
+    const projectBackendAssets = (await api_ListBackendAssetsAssociatedWithPublicProject(storyIdParam)) as FaderBackendAsset[];
+
+    const backendAssets = arrayToRecordOfIds(projectBackendAssets);
+    storeSetFaderStoryBackendAssets(backendAssets);
 };
 
 export const wrappers_UpdateStoryAssetInStoreAndRemote = (storyAsset: FaderSceneAssetType, scene: FaderSceneType) => {
@@ -158,6 +190,20 @@ export const wrappers_UpdateSceneInLocalAndRemote = (scene: FaderSceneType) => {
     storeUpdateFaderScene(scene);
     const updatedFaderScene = useZustand.getState().fader.faderScenes![scene.id];
     api_UpdateScene(updatedFaderScene).catch((e) => new Error(e as string));
+};
+
+/** Sets sceneId to Store and modifies query param in URL */
+export const wrappers_SetSceneIdInStoreAndUrl = (sceneId: FaderSceneType['id']) => {
+    const url = new URL(document.location as unknown as URL);
+    url.searchParams.set('scene_id', sceneId);
+    history.pushState({}, '', url);
+
+    storeSetCurrentSceneId(sceneId);
+};
+
+export const wrappers_SetStoryToStoreAndRemote = (story: FaderStoryType) => {
+    api_UpdateProject(story.id, story).catch((e) => new Error(e as string));
+    storeSetFaderStory(story);
 };
 
 /*

@@ -1,8 +1,9 @@
-import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
+import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import Asset, { AssetJsxElementParams } from './Asset';
 import Hls from 'hls.js';
 import { useEffect, useRef } from 'react';
-import { defaultCardWidth, defaultCardHeight } from '../../lib/defaults';
+import { defaultCardWidth, defaultCardHeight } from '../../../lib/defaults';
+import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 
 type Videos2dProps = {
     scene: FaderSceneType;
@@ -19,6 +20,13 @@ const Videos2d = (props: Videos2dProps) => {
                 if (videoAsset) {
                     const videoBackendAsset = storyVideo2dBackendAssets[videoAsset.backendId];
 
+                    /* Update the scene's duration to the longest Video asset's duration: */
+                    if (videoBackendAsset.attributes.duration > parseFloat(scene.duration)) {
+                        wrappers_UpdateSceneInLocalAndRemote({
+                            ...scene,
+                            duration: videoBackendAsset.attributes.duration.toString(),
+                        });
+                    }
                     return (
                         <Asset
                             key={`Video2d ${videoId} / ${idx}`}
@@ -38,7 +46,7 @@ const Videos2d = (props: Videos2dProps) => {
 
 export default Videos2d;
 
-const Video2dJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
+const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
     if (!backendAsset || !Hls.isSupported()) {
         return <></>;
     }
@@ -64,7 +72,8 @@ const Video2dJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
             controls
             playsInline
             preload='auto'
-            autoPlay={false}
+            autoPlay={asset.data.autoPlay}
+            loop={asset.data.loop}
             crossOrigin='anonymous'
             disablePictureInPicture
             width={Math.min(backendAsset.attributes.width, defaultCardWidth)}

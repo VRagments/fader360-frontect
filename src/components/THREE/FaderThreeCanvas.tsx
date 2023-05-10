@@ -10,10 +10,10 @@ import { backgroundSphereGeometryArgs } from '../../lib/defaults';
 
 type FaderThreeCanvasProps = {
     scene: FaderSceneType;
-    debug: boolean;
+    debug?: boolean;
 };
 const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
-    const { scene, debug } = props;
+    const { scene, debug = false } = props;
     const faderStory = useZustand((state) => state.fader.faderStory);
 
     if (!faderStory) {
@@ -22,7 +22,8 @@ const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
 
     return (
         <Canvas
-            frameloop={'always'} // TODO 'demand' would be lots nicer - for now it interferes with videoplayback, though
+            // TODO 'demand' would be lots nicer - for now it interferes with videoplayback, though:
+            frameloop={'always'}
             id={'THREE (R3F) Canvas'}
             gl={{ antialias: true }}
         >
@@ -31,7 +32,8 @@ const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
                 <OrbitControls
                     enableZoom={debug}
                     enablePan={debug}
-                    target={[-0.0001, 1.75, 0] /* teeny positive value to change initial orientation */}
+                    /* teeny positive value to change initial orientation: */
+                    target={[-0.0001, 1.75, 0]}
                 >
                     <PerspectiveCamera
                         attach={'camera'}
@@ -46,7 +48,7 @@ const FaderThreeCanvas = (props: FaderThreeCanvasProps) => {
 
                 <FaderScene currentScene={scene} />
 
-                <Grid />
+                {scene.data.enableGrid && <Grid />}
 
                 {debug && <Debug />}
             </group>
@@ -82,7 +84,8 @@ const Debug = () => {
             <Sphere args={[0.333, 64, 64]}>
                 <meshStandardMaterial metalness={1.0} roughness={0.1} attach='material' />
             </Sphere>
-            <axesHelper position={[0, 0.0001, 0]} /* bumped Z by tiny amount to prevent flickering */ />
+            {/* bumped Z by tiny amount to prevent flickering: */}
+            <axesHelper position={[0, 0.0001, 0]} />
         </>
     );
 };

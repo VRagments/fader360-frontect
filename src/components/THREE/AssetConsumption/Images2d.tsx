@@ -1,5 +1,5 @@
-import { defaultCardHeight, defaultCardWidth } from '../../lib/defaults';
-import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
+import { defaultCardHeight, defaultCardWidth } from '../../../lib/defaults';
+import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import Asset, { AssetJsxElementParams } from './Asset';
 
 type Images2dProps = {

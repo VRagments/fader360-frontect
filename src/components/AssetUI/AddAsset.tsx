@@ -1,3 +1,4 @@
+import { levaValuesForTw } from '../../style/levaTheme';
 import { FaderAssetGroupType } from '../../types/FaderTypes';
 
 type AddAssetProps = {
@@ -21,7 +22,12 @@ const AddAsset = ({ groupType, addAssetPanelState }: AddAssetProps) => {
     return (
         <>
             <div
-                className='my-1  cursor-pointer rounded-md bg-slate-700 px-2 py-1 text-center text-xs text-slate-200 '
+                className={
+                    'my-1 cursor-pointer rounded-md px-2 py-1 text-center text-slate-200 hover:bg-orange-400' +
+                    levaValuesForTw.fontSizes.root +
+                    levaValuesForTw.colors.highlight2.text +
+                    levaValuesForTw.colors.elevation3.bg
+                }
                 onClick={(_ev) => {
                     setAddAssetPanelVisible({ visible: true, assetGroupType: groupType });
                 }}

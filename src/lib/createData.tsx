@@ -132,7 +132,7 @@ export const syncSceneData = (remoteSceneData: FaderSceneDataType) => {
     }
 
     /* Sometimes we rename keys: */
-    if ('Interactive' in remoteSceneData.assetOrderByGroup) {
+    if (remoteSceneData.assetOrderByGroup && 'Interactive' in remoteSceneData.assetOrderByGroup) {
         const interactiveBackup = remoteSceneData.assetOrderByGroup.Interactive as string[];
         delete remoteSceneData.assetOrderByGroup.Interactive;
         remoteSceneData.assetOrderByGroup.SceneLink.push(...interactiveBackup);
@@ -156,6 +156,7 @@ export const syncSceneData = (remoteSceneData: FaderSceneDataType) => {
         },
     };
 
+    console.log('%c[createData]', 'color: #f62612', `synchronizedSceneData :`, synchronizedSceneData);
     return synchronizedSceneData;
 };
 

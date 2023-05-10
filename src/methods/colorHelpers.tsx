@@ -16,7 +16,7 @@ export const mergeHexAndOpacityValues = (color: string, opacity: number) => {
     return colorAndOpacityHex;
 };
 
-export const hexBgColorToTwRgbColor = (hexString: string) => {
+export const hexBgColorToTwRgbColor = (hexString: string, opacity: number) => {
     const rgbaObject = hexRgb(hexString);
-    return `rgb(${rgbaObject.red} ${rgbaObject.green} ${rgbaObject.blue} / var(--tw-bg-opacity))`;
+    return `rgb(${rgbaObject.red} ${rgbaObject.green} ${rgbaObject.blue} / ${opacity})`;
 };

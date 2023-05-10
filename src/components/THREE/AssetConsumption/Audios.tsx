@@ -1,6 +1,7 @@
 import Hls from 'hls.js';
 import { useEffect, useRef } from 'react';
-import { FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
+import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
+import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import Asset, { AssetJsxElementParams } from './Asset';
 
 type AudiosProps = {
@@ -17,6 +18,18 @@ const Audios = (props: AudiosProps) => {
 
                 if (audioAsset) {
                     const audioBackendAsset = storyAudioBackendAssets[audioAsset.backendId];
+
+                    if (audioBackendAsset.attributes.duration > parseFloat(scene.duration)) {
+                        //
+                    }
+
+                    /* Update the scene's duration to the longest Video asset's duration: */
+                    if (audioBackendAsset.attributes.duration > parseFloat(scene.duration)) {
+                        wrappers_UpdateSceneInLocalAndRemote({
+                            ...scene,
+                            duration: audioBackendAsset.attributes.duration.toString(),
+                        });
+                    }
 
                     return (
                         <Asset
@@ -37,7 +50,7 @@ const Audios = (props: AudiosProps) => {
 
 export default Audios;
 
-const AudioJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
+const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const hls = useRef({ hls: new Hls(), audioSource: backendAsset?.static_url });
 
@@ -57,7 +70,15 @@ const AudioJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
         return <></>;
     } else {
         return (
-            <audio ref={audioRef} className='block ' controls autoPlay={true} preload='auto' style={{ width: `260px`, height: `20px` }}>
+            <audio
+                ref={audioRef}
+                className='block '
+                controls
+                autoPlay={asset.data.autoPlay}
+                loop={asset.data.loop}
+                preload='auto'
+                style={{ width: `260px`, height: `20px` }}
+            >
                 Your browser does not support the audio element.
             </audio>
         );

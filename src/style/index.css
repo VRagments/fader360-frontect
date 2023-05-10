@@ -14,3 +14,18 @@ code {
 .fader-3d-card {
     @apply box-content flex select-none flex-col content-center items-center rounded-md bg-clip-padding p-2 text-center;
 }
+
+.progress-bar-background {
+    @apply relative -m-1 mt-2 h-3 overflow-clip rounded-b-md border-t-4 border-double border-slate-500 bg-slate-500;
+}
+
+.progress-bar {
+    @apply -mb-2 flex h-full w-0 flex-row justify-start bg-orange-500/70 transition-[width] delay-0 duration-500 ease-out;
+}
+
+/* WARN Since transform3d() is rendered as WebGPU textures, this will affect performance by doubling the texture size? */
+.html-component-blurriness-hack {
+    zoom: 2;
+    scale: 0.5;
+    transform-origin: top left;
+}

@@ -13,16 +13,17 @@ const {
 /** OUR default values. Originals here: https://github.com/pmndrs/leva/blob/main/packages/leva/src/styles/stitches.config.ts */
 export const levaThemeValues: LevaThemeType = {
     colors: {
-        elevation1: hexBgColorToTwRgbColor(tailwindConfigColors.slate['700']), // title bg
-        elevation2: hexBgColorToTwRgbColor(tailwindConfigColors.slate['500']), // panels bg
-        elevation3: hexBgColorToTwRgbColor(tailwindConfigColors.slate['800']), // input fields
+        elevation1: hexBgColorToTwRgbColor(tailwindConfigColors.slate['700'], 0.85), // title panel bg
+        elevation2: hexBgColorToTwRgbColor(tailwindConfigColors.slate['500'], 0.85), // panels bg
+        elevation3: hexBgColorToTwRgbColor(tailwindConfigColors.slate['800'], 0.85), // input fields
         vivid1: tailwindConfigColors.red['500'],
         accent1: tailwindConfigColors.slate['100'], // border color onMouseOver
         accent2: tailwindConfigColors.slate['400'], // sliders
         accent3: tailwindConfigColors.slate['50'], // slider onDrag
         highlight1: tailwindConfigColors.slate['100'], // Title font
         highlight2: tailwindConfigColors.slate['300'], // Regular font
-        highlight3: tailwindConfigColors.slate['300'], // Sub-header Font
+        highlight3: tailwindConfigColors.slate['600'], // Sub-header Font
+        folderTextColor: tailwindConfigColors.slate['200'],
     },
     radii: {
         xs: '2px',
@@ -40,7 +41,7 @@ export const levaThemeValues: LevaThemeType = {
         sans: tailwindConfigFonts.sans.join(', '),
     },
     fontSizes: {
-        root: '11px',
+        root: '0.9rem',
     },
     sizes: {
         rootWidth: '400px',
@@ -55,6 +56,7 @@ export const levaThemeValues: LevaThemeType = {
         colorPickerWidth: '160px',
         colorPickerHeight: '100px',
         monitorHeight: '60px',
+        titleBarHeight: '3rem',
     },
     borderWidths: {
         root: '0px',
@@ -71,6 +73,48 @@ export const levaThemeValues: LevaThemeType = {
     },
 };
 
+/**
+ * WARN keep synced to levaThemeValues.colors!
+ * - Space prefixed to simplify className string concatenation
+ * - Can't be dynamically generated from levaThemeValues unfortunately, because TW doesn't actually parse code and only sees complete classnames
+ */
+export const levaValuesForTw = {
+    colors: {
+        elevation1: {
+            bg: ` bg-slate-700`,
+            text: ` text-slate-700`,
+            fill: ` fill-slate-700`,
+        },
+        elevation2: {
+            bg: ` bg-slate-500`,
+        },
+        elevation3: {
+            bg: ` bg-slate-800`,
+        },
+        highlight1: {
+            text: ` text-slate-100`,
+            fill: ` fill-slate-100`,
+        },
+        highlight2: {
+            text: ` text-slate-300`,
+        },
+        folderTextColor: {
+            text: ` text-slate-200`,
+        },
+    },
+    fontSizes: {
+        root: ` text-[0.9rem]`,
+    },
+    fontWeights: {
+        label: ` font-normal`,
+        folder: ` font-normal`,
+        button: ` font-normal`,
+    },
+    sizes: {
+        titleBarHeight: ` h-[3rem]`,
+    },
+};
+
 export type LevaThemeType = {
     colors: {
         elevation1: string;
@@ -83,6 +127,7 @@ export type LevaThemeType = {
         highlight1: string;
         highlight2: string;
         highlight3: string;
+        folderTextColor: string;
     };
     radii: {
         xs: string;
@@ -115,6 +160,7 @@ export type LevaThemeType = {
         colorPickerWidth: string;
         colorPickerHeight: string;
         monitorHeight: string;
+        titleBarHeight: string;
     };
     borderWidths: {
         root: string;

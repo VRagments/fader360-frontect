@@ -1,4 +1,4 @@
-import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneAssetType } from '../types/FaderTypes';
+import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneAssetType, FaderSceneType } from '../types/FaderTypes';
 import { arrayOfFaderAssetGroupTypes, arrayOfFaderAssetTypes } from '../lib/defaults';
 
 /** Returns object with collection of `[id]: FaderStoryAsset` */
@@ -13,15 +13,15 @@ export const filterStoryAssetsByType = (type: FaderAssetType, assets: Record<str
 /** Returns filtered object with collection of `[id]: FaderBackendAsset` */
 export const getBackendAssetsFromStoryAssetsByGroupType = (
     group: FaderAssetGroupType,
-    storyAssets: Record<string, FaderSceneAssetType>,
+    sceneAssets: Record<string, FaderSceneAssetType>,
     backendAssets: Record<string, FaderBackendAsset>
 ) => {
     const returnObject: typeof backendAssets = {};
 
-    for (const key in storyAssets) {
-        if (storyAssets[key].group === group) {
-            if (Object.prototype.hasOwnProperty.call(backendAssets, storyAssets[key].backendId)) {
-                returnObject[storyAssets[key].backendId] = backendAssets[storyAssets[key].backendId];
+    for (const key in sceneAssets) {
+        if (sceneAssets[key].group === group) {
+            if (Object.prototype.hasOwnProperty.call(backendAssets, sceneAssets[key].backendId)) {
+                returnObject[sceneAssets[key].backendId] = backendAssets[sceneAssets[key].backendId];
             }
         }
     }
@@ -105,4 +105,27 @@ export const getSortedBackendAssetsByType = (backendAssets: Record<string, Fader
     }
 
     return returnTypeObject;
+};
+
+export const setSceneOrderOfScene = (
+    sceneOrderArray: FaderSceneType['id'][],
+    sceneIdToSet: FaderSceneType['id'],
+    newOrderIndex: number
+) => {
+    // if (sceneOrderArray.findIndex((sceneId) => sceneId === sceneIdToSet) !== -1) {
+    if (newOrderIndex < sceneOrderArray.length) {
+        const newArray = [...sceneOrderArray];
+        const oldSceneIdAtIndex = sceneOrderArray[newOrderIndex];
+        const currentIndexOfSceneToSet = sceneOrderArray.findIndex((sceneId) => sceneId === sceneIdToSet);
+
+        /* Set to new index: */
+        newArray.splice(newOrderIndex, 1, sceneIdToSet);
+
+        /* Move previous occupant to old sceneId index:  */
+        newArray.splice(currentIndexOfSceneToSet, 1, oldSceneIdAtIndex);
+
+        return newArray;
+    } else {
+        return sceneOrderArray;
+    }
 };

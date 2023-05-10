@@ -6,8 +6,8 @@ import { groupAndTypeLinks } from '../../lib/createAsset';
 import { arrayOfFaderAssetGroupTypes } from '../../lib/defaults';
 import useZustand from '../../lib/zustand/zustand';
 import { getSortedBackendAssetsByType } from '../../methods/faderHelpers';
-import { generateNamedBackendAssetIdRecord } from '../../methods/useLevaControls';
-import { levaThemeValues } from '../../style/levaTheme';
+import { generateNamedBackendAssetIdRecord } from '../../lib/hooks/useLevaControls';
+import { levaThemeValues, levaValuesForTw } from '../../style/levaTheme';
 import { FaderAssetGroupType, FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
 import AddAsset from './AddAsset';
 import AssetGroup from './AssetGroup';
@@ -33,9 +33,17 @@ type AssetPanelProps = {
 const AssetPanel = ({ setOpenPanel, currentScene, selectedAssetState, addAssetPanelState }: AssetPanelProps) => {
     return (
         <>
-            <div className='h-full w-full font-mono text-sm text-[11px]'>
-                <div className='flex flex-row items-center justify-center bg-slate-700 px-1 text-slate-100'>
-                    <span className='m-auto'>Asset Panel</span>
+            <div className={'h-full w-full font-mono'}>
+                <div
+                    className={
+                        'flex flex-row items-center justify-center bg-opacity-[0.85] px-1' +
+                        levaValuesForTw.colors.elevation1.bg +
+                        levaValuesForTw.colors.highlight1.text +
+                        levaValuesForTw.sizes.titleBarHeight +
+                        levaValuesForTw.fontSizes.root
+                    }
+                >
+                    <span className='w-full text-center'>Asset Panel</span>
                     <XCircleIcon
                         className='ml-auto h-10 w-10 cursor-pointer fill-slate-200 hover:fill-slate-500'
                         onClick={() => {
@@ -46,8 +54,19 @@ const AssetPanel = ({ setOpenPanel, currentScene, selectedAssetState, addAssetPa
                 <div className='flex flex-col items-center py-1'>
                     {arrayOfFaderAssetGroupTypes.map((groupType, idx) => {
                         return (
-                            <div key={`${groupType} - ${idx}`} className='relative flex w-full flex-col items-center text-[11px]'>
-                                <div className='w-full self-start bg-slate-500 px-1 pl-2 text-slate-200'>{groupType}</div>
+                            <div
+                                key={`${groupType} - ${idx}`}
+                                className={'relative flex w-full flex-col items-center' + levaValuesForTw.fontSizes.root}
+                            >
+                                <div
+                                    className={
+                                        'w-full self-start px-1 pl-2' +
+                                        levaValuesForTw.colors.elevation2.bg +
+                                        levaValuesForTw.colors.folderTextColor.text
+                                    }
+                                >
+                                    {groupType}
+                                </div>
                                 <AssetGroup
                                     assetGroup={currentScene.data.assetOrderByGroup[groupType]}
                                     sceneAssets={currentScene.data.assets}
@@ -136,7 +155,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
     );
 
     return (
-        <div className='pointer-events-auto absolute left-1/2 right-1/2 bottom-1/2 w-max rounded-md  bg-slate-500 bg-opacity-75 drop-shadow-2xl'>
+        <div className='pointer-events-auto absolute bottom-1/2 left-1/2 right-1/2 w-max rounded-md  bg-slate-500 bg-opacity-75 drop-shadow-2xl'>
             <LevaPanel
                 store={addAssetLevaStore}
                 theme={levaThemeValues}
@@ -148,7 +167,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
             />
             {/* Needs to be absolutely positioned atop of Leva's title bar (we have no direct access to their html): */}
             <XCircleIcon
-                className='absolute top-0 right-0 h-10 w-10 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
+                className='absolute right-0 top-0 h-10 w-10 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
                 onClick={() => {
                     setAddAssetPanelOpts({ visible: false, assetGroupType: '' });
                 }}

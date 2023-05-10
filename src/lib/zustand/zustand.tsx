@@ -13,14 +13,10 @@ const useZustand = create<ZustandState>()(
         immer((set, _get) => {
             const initialState: ZustandState = {
                 methods: {
-                    storeSetApiAuthToken: (access_token) => {
-                        set(
-                            (draftState) => {
-                                draftState.siteData.apiAuthToken = access_token;
-                            },
-                            false,
-                            'storeSetApiAuthToken'
-                        );
+                    storeSetCurrentSceneId: (scene_id) => {
+                        set((draftState) => {
+                            draftState.fader.currentFaderSceneId = scene_id;
+                        });
                     },
                     storeSetFaderStory: (story) => {
                         set(
@@ -142,11 +138,12 @@ const useZustand = create<ZustandState>()(
                     },
                 },
                 siteData: {
-                    apiAuthToken: '',
+                    // TODO unused
                 },
                 fader: {
                     faderStory: null,
                     faderScenes: null,
+                    currentFaderSceneId: '',
                     faderStoryBackendAssets: {},
                     faderLevaPanels: [],
                     faderLevaOptionsStore: null,

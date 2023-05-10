@@ -1,4 +1,4 @@
-import { FaderSceneType } from '../../types/FaderTypes';
+import { FaderSceneType } from '../../../types/FaderTypes';
 import Asset from './Asset';
 
 type TextCardsProps = {

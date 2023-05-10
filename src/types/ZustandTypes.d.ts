@@ -3,11 +3,10 @@ import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderSceneAssetType,
 
 export interface ZustandState {
     siteData: {
-        apiAuthToken: string;
+        //
     };
     methods: {
-        /** Sets Api Token from Api call */
-        storeSetApiAuthToken: (access_token: string) => void;
+        storeSetCurrentSceneId: (scene_id: FaderSceneType['id']) => void;
         /** Sets Project */
         storeSetFaderStory: (story: FaderStoryType) => void;
         /** Store Scenes of a Project */
@@ -26,6 +25,7 @@ export interface ZustandState {
     fader: {
         faderStory: FaderStoryType | null;
         faderScenes: Record<string, FaderSceneType> | null;
+        currentFaderSceneId: FaderSceneType['id'];
         faderStoryBackendAssets: Record<string, FaderBackendAsset>;
         faderLevaPanels: LevaPanelOptions[];
         faderLevaOptionsStore: StoreType | null;

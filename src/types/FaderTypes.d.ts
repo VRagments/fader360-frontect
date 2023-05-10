@@ -38,7 +38,7 @@ export interface FaderStoryDataType {
 export interface FaderSceneType {
     created_at: string;
     data: FaderSceneDataType;
-    duration: number;
+    duration: string;
     id: string;
     name: string;
     navigatable: boolean; // former "jumpTo"
@@ -66,11 +66,13 @@ export interface FaderSceneDataType {
         selectedAssetIdByGroup: Record<string, FaderAssetGroupType>;
         selectedAssetGroup: FaderAssetGroupType;
     };
+    enableGrid: boolean;
 }
 
 export interface FaderSceneAssetType {
     backendId: FaderBackendAsset['id'];
     data: {
+        autoPlay: boolean /* does the media play automatically? */;
         backgroundColor: string;
         backgroundOn: boolean;
         backgroundOpacity: number;
@@ -83,6 +85,7 @@ export interface FaderSceneAssetType {
         frameOpacity: number;
         headline: string;
         legacyInteractiveSize: boolean;
+        loop: boolean /* does the media loop? */;
         name: string /* Added by myself to store name from FaderBackendAsset */;
         nextSceneId: string;
         textColor: string;

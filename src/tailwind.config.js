@@ -25,7 +25,6 @@ module.exports = {
     corePlugins: {
         aspectRatio: false,
     },
-    plugins: [require('@tailwindcss/line-clamp')],
     variants: {
         extend: {
             margin: ['first', 'last'],
