@@ -1,7 +1,6 @@
 {
-    "login": {
-        "username": "jensVrag",
-        "password": "jVragments"
+    "api": {
+        "baseUrl": "http://localhost:45020/api"
     },
     "dev": {
         "devMode": true,

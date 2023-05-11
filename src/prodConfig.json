@@ -1,7 +1,6 @@
 {
-    "login": {
-        "username": "",
-        "password": ""
+    "api": {
+        "baseUrl": ""
     },
     "dev": {
         "devMode": false,

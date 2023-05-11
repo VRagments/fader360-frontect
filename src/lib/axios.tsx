@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ApiListResponse } from '../types/ApiTypes';
 import { FaderBackendAsset, FaderSceneType, FaderStoryType } from '../types/FaderTypes';
+import buildConfig from '../buildConfig';
 
 const api = axios.create();
-const apiBaseUrl = `http://localhost:45020/api`;
+const apiBaseUrl = buildConfig.api.baseUrl;
 
 /** GETs a Project/FaderStory via id */
 export const api_ShowProject = async (project_id: string) => {

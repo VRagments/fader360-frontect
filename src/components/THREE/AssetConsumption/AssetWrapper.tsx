@@ -47,7 +47,6 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
                 // distanceFactor={10}
                 occlude={false}
                 zIndexRange={[10, 0]}
-                wrapperClass='html-component-blurriness-hack'
             >
                 <div
                     id={asset.id}

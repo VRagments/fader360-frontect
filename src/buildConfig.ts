@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Falsey } from 'lodash';
 
 let config: Partial<ConfigType> = {};
 
 type ConfigType = {
-    login: {
-        username: string | Falsey;
-        password: string | Falsey;
+    api: {
+        baseUrl: string;
     };
     dev: {
         devMode: boolean;
