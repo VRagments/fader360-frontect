@@ -1,0 +1,11 @@
+---
+version: '3'
+services:
+  fader360_frontend:
+    build:
+      context: ./docker
+      target: fader_release
+    image: "${DOCKER_IMAGE}:${DOCKER_TAG}"
+    ports:
+      - "45010:80"
+    restart: always

@@ -27,3 +27,4 @@ yarn-error.log*
 
 # jens' attempt to make running new_darth less of a hassle :)
 runNewDarth.sh
+docker/work/

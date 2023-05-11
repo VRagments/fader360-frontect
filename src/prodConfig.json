@@ -1,6 +1,6 @@
 {
     "api": {
-        "baseUrl": ""
+        "baseUrl": "https://fader360.vrgmnts.net/api"
     },
     "dev": {
         "devMode": false,
