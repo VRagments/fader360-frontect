@@ -45,7 +45,7 @@ const AssetPanel = ({ setOpenPanel, currentScene, selectedAssetState, addAssetPa
                 >
                     <span className='w-full text-center'>Asset Panel</span>
                     <XCircleIcon
-                        className='ml-auto h-10 w-10 cursor-pointer fill-slate-200 hover:fill-slate-500'
+                        className='ml-auto mr-1 h-8 w-8 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
                         onClick={() => {
                             setOpenPanel('');
                         }}
@@ -155,7 +155,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
     );
 
     return (
-        <div className='pointer-events-auto absolute bottom-1/2 left-1/2 right-1/2 w-max rounded-md  bg-slate-500 bg-opacity-75 drop-shadow-2xl'>
+        <div className='pointer-events-auto absolute bottom-1/2 left-1/2 right-1/2 z-[1010] w-max rounded-md bg-slate-500 bg-opacity-75 drop-shadow-2xl'>
             <LevaPanel
                 store={addAssetLevaStore}
                 theme={levaThemeValues}
@@ -167,7 +167,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
             />
             {/* Needs to be absolutely positioned atop of Leva's title bar (we have no direct access to their html): */}
             <XCircleIcon
-                className='absolute right-0 top-0 h-10 w-10 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
+                className='absolute right-0 top-0 mr-1 h-8 w-8 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
                 onClick={() => {
                     setAddAssetPanelOpts({ visible: false, assetGroupType: '' });
                 }}

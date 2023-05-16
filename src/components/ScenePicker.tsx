@@ -4,21 +4,22 @@ import useZustand from '../lib/zustand/zustand';
 import { FaderSceneType, FaderStoryType } from '../types/FaderTypes';
 import { ZustandState } from '../types/ZustandTypes';
 
-const classNames = 'relative pointer-events-auto block m-1 p-1 grow rounded-md transition-colors duration-700';
+const progressBarClassNames = 'relative pointer-events-auto block m-1 p-1 grow rounded-md transition-colors duration-700';
 
 type ScenePickerPropsType = {
     storyData: FaderStoryType['data'];
     faderScenes: NonNullable<ZustandState['fader']['faderScenes']>;
     viewMode: boolean;
+    className: string;
 };
 const ScenePicker = forwardRef<HTMLSpanElement, ScenePickerPropsType>(
-    ({ storyData, faderScenes, viewMode = true }: ScenePickerPropsType, scenePickerViewModeProgressRef) => {
+    ({ storyData, faderScenes, viewMode = true, className }: ScenePickerPropsType, scenePickerViewModeProgressRef) => {
         const currentSceneId = useZustand((state) => state.fader.currentFaderSceneId);
         const storeSetCurrentSceneId = useZustand((state) => state.methods.storeSetCurrentSceneId);
 
         return (
             /* Root element of ScenePicker bar: */
-            <div className='mb-3 flex w-1/3 content-center justify-between rounded-md bg-slate-500 bg-opacity-75 p-1 text-slate-200 drop-shadow-2xl'>
+            <div className={className}>
                 {/* Maps all Scenes in correct order and display in ScenePicker as consecutive buttons: */}
                 {storyData.sceneOrder.map((orderedSceneId, idx, arr) => {
                     const scene = faderScenes[orderedSceneId];
@@ -33,13 +34,13 @@ const ScenePicker = forwardRef<HTMLSpanElement, ScenePickerPropsType>(
                             scene,
                             isActiveScene,
                             sceneNotYetPlayed,
-                            classNames,
+                            progressBarClassNames,
                             storeSetCurrentSceneId,
                             arr.length,
                             scenePickerViewModeProgressRef
                         );
                     } else {
-                        return returnEditModeMarkup(idx, orderedSceneId, scene.name, isActiveScene, classNames, arr.length);
+                        return returnEditModeMarkup(idx, orderedSceneId, scene.name, isActiveScene, progressBarClassNames, arr.length);
                     }
                 })}
             </div>

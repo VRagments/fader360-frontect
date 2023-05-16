@@ -5,19 +5,21 @@ import FaderStoryViewer from './pages/FaderStoryViewer';
 import { useEffect, useState } from 'react';
 import { FaderStoryType } from './types/FaderTypes';
 import useZustand from './lib/zustand/zustand';
+import buildConfig from './buildConfig';
 
 function App() {
     const [storyId, setStoryId] = useState<FaderStoryType['id'] | null>(null);
+    const [debug, setDebug] = useState(false);
 
     return (
         <div className='flex h-screen w-screen flex-col'>
             <Nav storyId={storyId} />
 
             <BrowserRouter basename={process.env.PUBLIC_URL}>
-                <GetSearchParams setStoryId={setStoryId} />
+                <GetSearchParams setStoryId={setStoryId} setDebug={setDebug} />
                 <Routes>
                     <Route path='view' element={<FaderStoryViewer storyId={storyId} />} />
-                    <Route path='edit' element={<FaderStoryEditor storyId={storyId} />} />
+                    <Route path='edit' element={<FaderStoryEditor storyId={storyId} debug={debug} />} />
                     <Route
                         path='*'
                         element={<h1 className='text-white'>File not found! Please pick a different destination via navigation menu</h1>}
@@ -32,13 +34,15 @@ export default App;
 
 type GetSearchParamsPropsType = {
     setStoryId: React.Dispatch<React.SetStateAction<string | null>>;
+    setDebug: React.Dispatch<React.SetStateAction<boolean>>;
 };
-const GetSearchParams = ({ setStoryId }: GetSearchParamsPropsType) => {
+const GetSearchParams = ({ setStoryId, setDebug }: GetSearchParamsPropsType) => {
     const storeSetCurrentSceneId = useZustand((state) => state.methods.storeSetCurrentSceneId);
 
     const [searchParams] = useSearchParams();
     const storyIdParam = searchParams.get('project_id');
     const sceneIdParam = searchParams.get('scene_id');
+    const debug = searchParams.get('debug');
 
     useEffect(() => {
         if (storyIdParam) {
@@ -47,7 +51,10 @@ const GetSearchParams = ({ setStoryId }: GetSearchParamsPropsType) => {
         if (sceneIdParam) {
             storeSetCurrentSceneId(sceneIdParam);
         }
-    }, [storyIdParam, sceneIdParam]);
+        if (debug !== null && buildConfig.dev.debugURLenabled) {
+            setDebug(true);
+        }
+    }, [storyIdParam, sceneIdParam, debug]);
 
     return null;
 };

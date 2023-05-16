@@ -27,7 +27,7 @@ const PanelsSlideOut = ({ setOpenPanel, position: _position }: PanelsSlideOutPro
     }
 
     return (
-        <div className='pointer-events-auto absolute right-0 top-0 z-10 m-2 flex flex-col rounded-md bg-slate-700 p-2'>
+        <div className='pointer-events-auto absolute right-0 top-0 z-30 m-2 flex flex-col rounded-md bg-slate-700 p-2'>
             <div
                 className='my-1 flex h-24 w-24 cursor-pointer flex-col items-center justify-around rounded-md bg-slate-500 p-2 hover:bg-slate-400'
                 onClick={(_event) => {

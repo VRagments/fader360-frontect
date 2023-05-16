@@ -76,12 +76,12 @@ const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
             <audio
                 /* set reference to element via setAudioRef callback: */
                 ref={setAudioRef}
-                className='block '
+                className='block'
                 controls
                 autoPlay={asset.data.autoPlay}
                 loop={asset.data.loop}
                 preload='auto'
-                style={{ width: `260px`, height: `20px` }}
+                style={{ width: `260px`, height: `30px` }}
             >
                 Your browser does not support the audio element.
             </audio>

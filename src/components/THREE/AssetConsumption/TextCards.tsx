@@ -34,5 +34,5 @@ const TextCards = (props: TextCardsProps) => {
 export default TextCards;
 
 const TextCardJsxElement = () => {
-    return <div></div>;
+    return <></>;
 };

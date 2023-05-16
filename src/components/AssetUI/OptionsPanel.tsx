@@ -17,7 +17,7 @@ const OptionsPanel = ({ setOpenPanel, currentScene }: OptionsPanelProps) => {
     return (
         <div
             className={
-                'pointer-events-auto absolute right-0 top-0 z-10 m-2 rounded-md bg-slate-500 bg-opacity-75 drop-shadow-2xl' +
+                'pointer-events-auto absolute right-0 top-0 z-30 m-2 rounded-md bg-slate-500 bg-opacity-75 drop-shadow-2xl' +
                 levaValuesForTw.fontSizes.root
             }
         >
@@ -35,7 +35,7 @@ const OptionsPanel = ({ setOpenPanel, currentScene }: OptionsPanelProps) => {
             />
             {/* Needs to be absolutely positioned atop of Leva's title bar (we have no direct access to their html): */}
             <XCircleIcon
-                className='absolute right-0 top-0 h-10 w-10 cursor-pointer fill-slate-200 hover:fill-slate-500'
+                className='absolute right-0 top-0 mr-1 h-8 w-8 cursor-pointer fill-slate-200 p-1 hover:fill-slate-500'
                 onClick={() => {
                     setOpenPanel('');
                 }}

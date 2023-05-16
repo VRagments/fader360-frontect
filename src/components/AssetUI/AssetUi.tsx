@@ -43,7 +43,7 @@ const AssetUi = ({ setOpenPanel, currentScene }: AssetUiProps) => {
 
             <div
                 ref={assetPanelParentRef}
-                className='pointer-events-auto absolute right-0 top-0 z-10 m-2 flex min-h-0 w-1/4 overflow-hidden rounded-md bg-slate-500 bg-opacity-75 drop-shadow-2xl'
+                className='pointer-events-auto absolute right-0 top-0 z-30 m-2 flex min-h-0 w-1/4 overflow-hidden rounded-md bg-slate-500 bg-opacity-75 drop-shadow-2xl'
             >
                 <AssetPanel
                     setOpenPanel={setOpenPanel}

@@ -41,7 +41,7 @@ export const levaThemeValues: LevaThemeType = {
         sans: tailwindConfigFonts.sans.join(', '),
     },
     fontSizes: {
-        root: '0.9rem',
+        root: '0.75rem',
     },
     sizes: {
         rootWidth: '400px',
@@ -56,7 +56,7 @@ export const levaThemeValues: LevaThemeType = {
         colorPickerWidth: '160px',
         colorPickerHeight: '100px',
         monitorHeight: '60px',
-        titleBarHeight: '3rem',
+        titleBarHeight: '2rem',
     },
     borderWidths: {
         root: '0px',
@@ -103,7 +103,7 @@ export const levaValuesForTw = {
         },
     },
     fontSizes: {
-        root: ` text-[0.9rem]`,
+        root: ` text-[0.75rem]`,
     },
     fontWeights: {
         label: ` font-normal`,
@@ -111,7 +111,7 @@ export const levaValuesForTw = {
         button: ` font-normal`,
     },
     sizes: {
-        titleBarHeight: ` h-[3rem]`,
+        titleBarHeight: ` h-[2rem]`,
     },
 };
 

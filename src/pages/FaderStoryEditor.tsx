@@ -1,8 +1,6 @@
 import { wrappers_FirstProjectInitAndSendToStore } from '../lib/api_and_store_wrappers';
 import useZustand from '../lib/zustand/zustand';
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import buildConfig from '../buildConfig';
 import ScenePicker from '../components/ScenePicker';
 import FaderThreeCanvas from '../components/THREE/FaderThreeCanvas';
 import AssetUi from '../components/AssetUI/AssetUi';
@@ -11,8 +9,9 @@ import OptionsPanel from '../components/AssetUI/OptionsPanel';
 
 export type FaderStoryEditorViewerPropsType = {
     storyId: string | null;
+    debug: boolean;
 };
-const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
+const FaderStoryEditor = ({ storyId, debug }: FaderStoryEditorViewerPropsType) => {
     const faderScenes = useZustand((state) => state.fader.faderScenes);
     const faderStory = useZustand((state) => state.fader.faderStory);
     const currentSceneId = useZustand((state) => state.fader.currentFaderSceneId);
@@ -42,9 +41,6 @@ const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
         }
     }, [faderThreeCanvasParentRef.current]);
 
-    /* Debug mode active with a `?debug` url param */
-    const debug = buildConfig.dev.debugURLenabled ? (useSearchParams()[0].get('debug') === '' ? true : false) : false;
-
     if (!storyId) {
         return <div className='text-slate-300'>No Story id provided!</div>;
     } else if (!faderStory) {
@@ -53,7 +49,7 @@ const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                 Cannot load Story data! Are you sure you're logged in?
                 <br />
                 <br />
-                <a href={`view/?project_id=${storyId}`}>View this Story</a>
+                <a href={`view?project_id=${storyId}`}>View this Story</a>
             </div>
         );
     } else if (!faderScenes) {
@@ -68,8 +64,8 @@ const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                 ) : (
                     <>
                         {faderStory.preview_image && (
-                            <div className='flex h-full w-full items-center justify-center drop-shadow-2xl'>
-                                <img className='rounded-lg object-scale-down' src={faderStory.preview_image} />
+                            <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
+                                <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
                             </div>
                         )}
                     </>
@@ -89,14 +85,19 @@ const FaderStoryEditor = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                     ) : null}
 
                     {/* Other Control elements:  */}
-                    <div className='absolute top-0 z-10 flex h-full w-full flex-col items-center justify-between'>
+                    <div className='absolute top-0 z-30 flex h-full w-full flex-col items-center justify-between p-2'>
                         {/* Story/User: */}
-                        <div className='m-2 w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
+                        <div className='w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
                             <b>{faderStory.name}</b> by <i>{faderStory.user_display_name}</i>
                         </div>
 
                         {/* Scene picking: */}
-                        <ScenePicker storyData={faderStory.data} faderScenes={faderScenes} viewMode={false} />
+                        <ScenePicker
+                            storyData={faderStory.data}
+                            faderScenes={faderScenes}
+                            viewMode={false}
+                            className='flex w-2/3 max-w-fit content-center justify-between justify-self-end rounded-md bg-slate-500 bg-opacity-75 p-1 text-slate-200 drop-shadow-2xl'
+                        />
                     </div>
                 </div>
             </div>

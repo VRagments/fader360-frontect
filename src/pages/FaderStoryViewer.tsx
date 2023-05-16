@@ -5,7 +5,7 @@ import { wrappers_ViewerProjectSyncToStore } from '../lib/api_and_store_wrappers
 import useZustand from '../lib/zustand/zustand';
 import { FaderStoryEditorViewerPropsType } from './FaderStoryEditor';
 
-const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
+const FaderStoryViewer = ({ storyId }: Omit<FaderStoryEditorViewerPropsType, 'debug'>) => {
     const faderScenes = useZustand((state) => state.fader.faderScenes);
     const faderStory = useZustand((state) => state.fader.faderStory);
     const currentSceneId = useZustand((state) => state.fader.currentFaderSceneId);
@@ -121,8 +121,8 @@ const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                 </div>
 
                 {faderStory.preview_image && (
-                    <div className='flex h-full w-full items-center justify-center drop-shadow-2xl'>
-                        <img className='rounded-lg object-scale-down' src={faderStory.preview_image} />
+                    <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
+                        <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
                     </div>
                 )}
             </div>
@@ -146,9 +146,9 @@ const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                 )}
                 {/* Overlays (Scene picker, Scene name etc) : */}
                 <div className='pointer-events-none' /* << to enable 'clicking through' to THREE canvas */>
-                    <div className='absolute top-0 z-10 flex h-full w-full flex-col items-center justify-between'>
+                    <div className='absolute top-0 z-30 flex h-full w-full flex-col items-center justify-between p-2'>
                         {/* Story/User: */}
-                        <div className='m-2 w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
+                        <div className='w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
                             <b>{faderStory.name}</b> by <i>{faderStory.user_display_name}</i>
                         </div>
 
@@ -158,6 +158,7 @@ const FaderStoryViewer = ({ storyId }: FaderStoryEditorViewerPropsType) => {
                             faderScenes={faderScenes}
                             viewMode={true}
                             ref={scenePickerViewModeProgressRef}
+                            className='flex w-2/3 max-w-fit content-center justify-between justify-self-end rounded-md bg-slate-500 bg-opacity-75 p-1 text-slate-200 drop-shadow-2xl'
                         />
                     </div>
                 </div>

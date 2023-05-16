@@ -32,6 +32,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
                 //
             },
             transient: false,
+            disabled: true,
         },
     };
 
@@ -214,41 +215,44 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             },
             { order: 0, collapsed: true }
         ),
-        Frame: folder({
-            frameOn: {
-                label: 'Use Frame',
-                value: assetDataRef.current.frameOn,
-                onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
-                    if (!initial) {
-                        assetDataRef.current = { ...assetDataRef.current, frameOn: val };
-                    }
+        Frame: folder(
+            {
+                frameOn: {
+                    label: 'Use Frame',
+                    value: assetDataRef.current.frameOn,
+                    onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
+                        if (!initial) {
+                            assetDataRef.current = { ...assetDataRef.current, frameOn: val };
+                        }
+                    },
+                    transient: false,
                 },
-                transient: false,
-            },
-            frameColor: {
-                label: 'Frame Color',
-                value: assetDataRef.current.frameColor,
-                onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
-                    if (!initial) {
-                        assetDataRef.current = { ...assetDataRef.current, frameColor: val };
-                    }
+                frameColor: {
+                    label: 'Frame Color',
+                    value: assetDataRef.current.frameColor,
+                    onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
+                        if (!initial) {
+                            assetDataRef.current = { ...assetDataRef.current, frameColor: val };
+                        }
+                    },
+                    transient: false,
                 },
-                transient: false,
-            },
-            frameOpacity: {
-                label: 'Frame Opacity',
-                value: assetDataRef.current.frameOpacity,
-                min: 0,
-                max: 1,
-                step: 0.01,
-                onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
-                    if (!initial) {
-                        assetDataRef.current = { ...assetDataRef.current, frameOpacity: val };
-                    }
+                frameOpacity: {
+                    label: 'Frame Opacity',
+                    value: assetDataRef.current.frameOpacity,
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                    onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
+                        if (!initial) {
+                            assetDataRef.current = { ...assetDataRef.current, frameOpacity: val };
+                        }
+                    },
+                    transient: false,
                 },
-                transient: false,
             },
-        }),
+            { order: 1, collapsed: true }
+        ),
     };
 
     if (asset.group == 'Image2D') {
@@ -261,7 +265,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
         // @ts-expect-error ...
         'Content': folder(contentControls, { order: 0, collapsed: false }),
 
-        'Display': folder(displayControls, { order: 1, collapsed: true }),
+        'Display': folder(displayControls, { order: 1, collapsed: false }),
 
         'Transforms': folder(transformControls, { order: 2, collapsed: false }),
 
@@ -371,57 +375,55 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
         setScenesOrderIndex(currentScenePlaceInSceneOrder);
     }, [scene.id]);
 
-    const sceneFolderSchema = useMemo(() => {
+    const sceneSettingsSchema = useMemo(() => {
         const schema = {
-            Settings: folder({
-                sceneName: {
-                    label: 'Scene Name',
-                    value: sceneName,
-                    onChange: (value: FaderSceneType['name'], _path, { initial }) => {
-                        if (!initial) {
-                            setSceneName(value);
-                        }
-                    },
-                    transient: false,
+            sceneName: {
+                label: 'Scene Name',
+                value: sceneName,
+                onChange: (value: FaderSceneType['name'], _path: string, { initial }: { initial: boolean }) => {
+                    if (!initial) {
+                        setSceneName(value);
+                    }
                 },
-                sceneDuration: {
-                    label: 'Scene Duration',
-                    value: parseFloat(sceneDuration),
-                    min: longestAudioAndVideoAssetDuration,
-                    step: 0.01,
-                    pad: 1,
-                    onChange: (value: FaderSceneType['duration'], _path, { initial }) => {
-                        if (!initial) {
-                            setSceneDuration(value.toString());
-                        }
-                    },
-                    transient: false,
+                transient: false,
+            },
+            sceneDuration: {
+                label: 'Scene Duration',
+                value: parseFloat(sceneDuration),
+                min: longestAudioAndVideoAssetDuration,
+                step: 0.01,
+                pad: 1,
+                onChange: (value: FaderSceneType['duration'], _path: string, { initial }: { initial: boolean }) => {
+                    if (!initial) {
+                        setSceneDuration(value.toString());
+                    }
                 },
-                sceneOrder: {
-                    label: 'Scene Order',
-                    value: scenesOrderIndex + 1 /* "human-readable" index starting at 1 */,
-                    min: 1,
-                    max: faderScenesOrder.length,
-                    step: 1,
-                    onChange: (value: number, _path, { initial }) => {
-                        if (!initial) {
-                            setScenesOrderIndex(value - 1);
-                        }
-                    },
-                    transient: false,
+                transient: false,
+            },
+            sceneOrder: {
+                label: 'Scene Order',
+                value: scenesOrderIndex + 1 /* "human-readable" index starting at 1 */,
+                min: 1,
+                max: faderScenesOrder.length,
+                step: 1,
+                onChange: (value: number, _path: string, { initial }: { initial: boolean }) => {
+                    if (!initial) {
+                        setScenesOrderIndex(value - 1);
+                    }
                 },
-                sceneNavigatable: {
-                    label: 'Navigatable?',
-                    hint: 'Can this Scene be jumped to?',
-                    value: sceneNavigatable,
-                    onChange: (value: FaderSceneType['navigatable'], _path, { initial }) => {
-                        if (!initial) {
-                            setSceneNavigatable(value);
-                        }
-                    },
-                    transient: false,
+                transient: false,
+            },
+            sceneNavigatable: {
+                label: 'Navigatable?',
+                hint: 'Can this Scene be jumped to?',
+                value: sceneNavigatable,
+                onChange: (value: FaderSceneType['navigatable'], _path: string, { initial }: { initial: boolean }) => {
+                    if (!initial) {
+                        setSceneNavigatable(value);
+                    }
                 },
-            }),
+                transient: false,
+            },
             enableGrid: {
                 label: 'Enable Grid',
                 value: enableGrid,
@@ -448,17 +450,15 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                         label: 'Available 360 Backgrounds',
                         options: namedEnvironmentBackendAssetIdRecord,
                         value: backgroundSelectValue,
-                        onChange: (value: FaderBackendAsset['id'], _path, { initial }) => {
-                            if (!initial) {
-                                setBackgroundSelectValue(value);
-                            }
+                        onChange: (value: FaderBackendAsset['id'], _path: string, { initial }) => {
+                            !initial && setBackgroundSelectValue(value);
                         },
                         transient: false,
                     },
                     enableGround: {
                         label: 'Enable Ground',
                         value: enableGround,
-                        onChange: (val: boolean, _path, { initial }) => {
+                        onChange: (val: boolean, _path: string, { initial }) => {
                             !initial && setEnableGround(val);
                         },
                         render: () =>
@@ -472,7 +472,7 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                                 min: -backgroundSphereRadius,
                                 max: backgroundSphereRadius,
                                 step: 1,
-                                onChange: (val: number, _path, { initial }) => {
+                                onChange: (val: number, _path: string, { initial }) => {
                                     !initial && setGroundYPos(val);
                                 },
                                 transient: false,
@@ -482,39 +482,46 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                                 value: groundRadius,
                                 min: 0,
                                 max: backgroundSphereRadius + 100,
-                                onChange: (val: number, _path, { initial }) => {
+                                onChange: (val: number, _path: string, { initial }) => {
                                     !initial && setGroundRadius(val);
                                 },
                                 transient: false,
                             },
                         },
                         {
-                            render: (get) => get('Scene Options.Background.enableGround') as boolean,
+                            collapsed: true,
+                            render: (get) => get('Scene Settings.Background.enableGround') as boolean,
+                        }
+                    ),
+                    Presets: folder(
+                        {
+                            presetSelect: {
+                                label: '3D Presets',
+                                options: { None: null },
+                                disabled: true,
+                            },
+                        },
+                        {
+                            collapsed: true,
                         }
                     ),
                 },
                 {
-                    render: (get) => get('Scene Options.enableBg') as boolean,
+                    render: (get) => {
+                        return get('Scene Settings.enableBg') as boolean;
+                    },
                 }
             ),
-            Preset: folder({
-                presetSelect: {
-                    label: '3D Presets',
-                    options: { None: null },
-                    disabled: true,
-                    render: (get) => get('Scene Options.enableBg') as boolean,
-                },
-            }),
         };
 
         return schema;
     }, []);
 
-    const levaOptionsSchema = {
-        'Scene Options': folder(sceneFolderSchema as unknown as Schema, { collapsed: false }),
+    const levaSettingsSchema = {
+        'Scene Settings': folder(sceneSettingsSchema as unknown as Schema, { collapsed: false }),
     };
 
-    const levaOptionsUseControls = useControls(() => levaOptionsSchema, { store }, [sceneId]);
+    const levaOptionsUseControls = useControls(() => levaSettingsSchema, { store }, [sceneId]);
 
     /* Update Store/Remote loop: */
     useEffect(() => {

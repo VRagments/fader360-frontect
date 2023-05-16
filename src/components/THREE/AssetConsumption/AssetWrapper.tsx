@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useCreateStore } from 'leva';
 import { debounce } from 'lodash';
-import { useRef, useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
 import { Camera } from 'three';
 import { wrappers_UpdateStoryAssetInStoreAndRemote } from '../../../lib/api_and_store_wrappers';
 import useZustand from '../../../lib/zustand/zustand';
@@ -11,6 +11,9 @@ import { convertTRS } from '../../../lib/methods/convertTRS';
 import { useControlsWrapperAssetProperties } from '../../../lib/hooks/useLevaControls';
 import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../../types/FaderTypes';
 import { LevaPanelOptions } from '../../../types/ZustandTypes';
+
+/** Factor by which to scale down the <Html> mesh representation, and then scale up the contained html elements (cheap AA trick) */
+const scaleFactor = 2;
 
 type AssetWrapperProps = {
     scene: FaderSceneType;
@@ -34,54 +37,52 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
     const [assetProperties] = assetPropertiesState;
 
     /* Memoize transform calculations, update on properties change */
-    const convertedTRSMemoized = useMemo(() => convertTRSMemoWrapper(assetProperties, cameraPos), [assetProperties, cameraPos]);
+    const convertedTRSMemoized = useMemo(() => convertTRSWrapper(assetProperties, cameraPos), [assetProperties, cameraPos]);
 
     return (
-        <>
-            <Html
-                key={asset.id}
-                position={convertedTRSMemoized.positionConverted}
-                rotation={convertedTRSMemoized.rotationConverted}
-                scale={convertedTRSMemoized.scaleConverted}
-                transform
-                // distanceFactor={10}
-                occlude={false}
-                zIndexRange={[10, 0]}
-            >
+        <Html
+            /* 'className' and 'style' affect the otherwise empty parent div, 'wrapperClass' affects the root div used for transforms: */
+            key={asset.id}
+            position={convertedTRSMemoized.positionConverted}
+            rotation={convertedTRSMemoized.rotationConverted}
+            scale={convertedTRSMemoized.scaleConverted.multiplyScalar(1 / scaleFactor)} /* see scaleFactor, Line 15 */
+            transform
+            zIndexRange={[19, 0]}
+            occlude={false}
+            className='box-content flex select-none flex-col content-center items-center overflow-hidden rounded-md p-2 text-center outline-none will-change-transform'
+            wrapperClass=''
+            style={{
+                color: assetDataRef.current.textColor,
+                backgroundColor: assetDataRef.current.backgroundOn
+                    ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
+                    : 'transparent',
+                boxShadow: `0px 0px 0px 0.15rem ${mergeHexAndOpacityValues(
+                    assetDataRef.current.frameColor,
+                    assetDataRef.current.frameOpacity
+                )}`,
+                transform: `scale3d(${scaleFactor}, ${scaleFactor}, ${scaleFactor})`, // see scaleFactor, Line 15
+            }}
+        >
+            {assetDataRef.current.headline && (
                 <div
-                    id={asset.id}
-                    className='fader-3d-card'
+                    id={`panel headline ${asset.id}`}
+                    className='bold mb-1 w-full rounded p-1 px-2 text-lg'
                     style={{
-                        color: assetDataRef.current.textColor,
                         backgroundColor: assetDataRef.current.backgroundOn
                             ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
                             : 'transparent',
-                        border: `2px ${assetDataRef.current.frameOn ? 'solid' : 'none'} ${mergeHexAndOpacityValues(
-                            assetDataRef.current.frameColor,
-                            assetDataRef.current.frameOpacity
-                        )}`,
                     }}
                 >
-                    {assetDataRef.current.headline && (
-                        <div
-                            id={`${asset.id} headline`}
-                            className='bold mb-1 w-full rounded p-1 px-2 text-lg'
-                            style={{
-                                backgroundColor: assetDataRef.current.backgroundOn
-                                    ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                                    : 'transparent',
-                            }}
-                        >
-                            {assetDataRef.current.headline}
-                        </div>
-                    )}
-                    {assetJsxElement({ asset, assetDataRef, backendAsset })}
-                    {assetDataRef.current.body && <div id={`${asset.id} body`}>{assetDataRef.current.body}</div>}
+                    {assetDataRef.current.headline}
                 </div>
-            </Html>
+            )}
+
+            {assetJsxElement({ asset, assetDataRef, backendAsset })}
+
+            {assetDataRef.current.body && <div id={`panel body ${asset.id}`}>{assetDataRef.current.body}</div>}
 
             {!viewMode && <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataRef={assetDataRef} />}
-        </>
+        </Html>
     );
 };
 
@@ -93,6 +94,8 @@ type EditModePropsType = {
     assetPropertiesState: [FaderSceneAssetType['properties'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['properties']>>];
     assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
 };
+
+/** Loads Leva panel for indivual asset settings in Edit mode  */
 const EditMode = (props: EditModePropsType) => {
     const { scene, asset, assetDataRef, assetPropertiesState } = props;
     const [assetProperties] = assetPropertiesState;
@@ -131,16 +134,19 @@ const EditMode = (props: EditModePropsType) => {
         return updatedStoryAssetData;
     }, [assetDataRef.current]);
 
+    /** Updates Story Asset after a 'debounced' amount of Milliseconds: */
     const debouncedAddOrUpdateStoryAsset = useCallback((updatedStoryAsset: FaderSceneAssetType, debounceValueMs: number) => {
+        // TODO Would it make sense to only debounce remote calls and instantly set changes to local store? Will we stay in sync?
         const debounced = debounce(() => wrappers_UpdateStoryAssetInStoreAndRemote(updatedStoryAsset, scene), debounceValueMs);
         debounced();
     }, []);
 
-    /* Longer debounce for changes in asset properties (as these are likely quickly changing TRS values) : */
+    /* Longer debounce for changes in asset properties (as these are likely quickly changing TRS values): */
     useEffect(() => {
         debouncedAddOrUpdateStoryAsset(updatedStoryAssetPropertiesMemo, 500);
     }, [updatedStoryAssetPropertiesMemo]);
 
+    /* Headline text, Frame/BG colors etc: */
     useEffect(() => {
         debouncedAddOrUpdateStoryAsset(updatedStoryAssetDataMemo, 150);
     }, [assetDataRef.current]);
@@ -159,7 +165,7 @@ export type AssetJsxElementParams = {
  */
 
 /** Wrapper for converting old-school Fader transforms to THREE space */
-function convertTRSMemoWrapper(assetProperties: FaderSceneAssetType['properties'], cameraPos: Camera['position']) {
+function convertTRSWrapper(assetProperties: FaderSceneAssetType['properties'], cameraPos: Camera['position']) {
     const newTRS = convertTRS({
         position: {
             x: assetProperties.positionX,

@@ -45,6 +45,7 @@ const Image2dJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
 
     return (
         <img
+            draggable={false}
             src={backendAsset.static_url}
             width={Math.min(backendAsset.attributes.width, defaultCardWidth)}
             height={Math.min(backendAsset.attributes.height, defaultCardHeight)}
