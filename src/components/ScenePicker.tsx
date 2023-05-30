@@ -4,7 +4,8 @@ import useZustand from '../lib/zustand/zustand';
 import { FaderSceneType, FaderStoryType } from '../types/FaderTypes';
 import { ZustandState } from '../types/ZustandTypes';
 
-const progressBarClassNames = 'relative pointer-events-auto block m-1 p-1 grow rounded-md transition-colors duration-700';
+const singleSceneElementClassNames =
+    'relative pointer-events-auto w-32 min-w-max block m-1 p-1 grow rounded-md transition-colors duration-700';
 
 type ScenePickerPropsType = {
     storyData: FaderStoryType['data'];
@@ -34,13 +35,20 @@ const ScenePicker = forwardRef<HTMLSpanElement, ScenePickerPropsType>(
                             scene,
                             isActiveScene,
                             sceneNotYetPlayed,
-                            progressBarClassNames,
+                            singleSceneElementClassNames,
                             storeSetCurrentSceneId,
                             arr.length,
                             scenePickerViewModeProgressRef
                         );
                     } else {
-                        return returnEditModeMarkup(idx, orderedSceneId, scene.name, isActiveScene, progressBarClassNames, arr.length);
+                        return returnEditModeMarkup(
+                            idx,
+                            orderedSceneId,
+                            scene.name,
+                            isActiveScene,
+                            singleSceneElementClassNames,
+                            arr.length
+                        );
                     }
                 })}
             </div>

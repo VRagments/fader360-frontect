@@ -49,7 +49,7 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
             transform
             zIndexRange={[19, 0]}
             occlude={false}
-            className='box-content flex select-none flex-col content-center items-center overflow-hidden rounded-md p-2 text-center outline-none will-change-transform'
+            className='box-content flex max-w-lg select-none flex-col content-center items-center overflow-hidden rounded-md p-2 text-center outline-none will-change-transform'
             wrapperClass=''
             style={{
                 color: assetDataRef.current.textColor,
@@ -79,7 +79,11 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
 
             {assetJsxElement({ asset, assetDataRef, backendAsset })}
 
-            {assetDataRef.current.body && <div id={`panel body ${asset.id}`}>{assetDataRef.current.body}</div>}
+            {assetDataRef.current.body && (
+                <div id={`panel body ${asset.id}`} className='whitespace-pre-wrap'>
+                    {assetDataRef.current.body}
+                </div>
+            )}
 
             {!viewMode && <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataRef={assetDataRef} />}
         </Html>
