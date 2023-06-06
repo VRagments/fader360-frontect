@@ -5,23 +5,51 @@ import {
     wrappers_DeleteAssetFromSceneStoreAndRemote,
     wrappers_SetStoryToStoreAndRemote,
     wrappers_UpdateSceneInLocalAndRemote,
+    wrappers_UpdateStoryAssetInStoreAndRemote,
 } from '../api_and_store_wrappers';
 import { backgroundSphereGeometryArgs } from '../defaults';
 import useZustand from '../zustand/zustand';
-import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../types/FaderTypes';
+import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType, FaderAssetGroupType } from '../../types/FaderTypes';
 import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType, setSceneOrderOfScene } from '../methods/faderHelpers';
+import { groupAndTypeLinks } from '../createAsset';
 
 type UseControlsWrapperAssetPropertiesParams = {
     asset: FaderSceneAssetType;
     assetPropertiesState: [FaderSceneAssetType['properties'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['properties']>>];
-    assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
+    assetDataState: [FaderSceneAssetType['data'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['data']>>];
     store?: StoreType;
-    scene?: FaderSceneType;
+    scene: FaderSceneType;
 };
 export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAssetPropertiesParams) => {
     /** Instead of using setState and syncing to remote in a useEffect, the passed-in Refs are mutated (as they are 'watched'/synced in <Asset>) */
-    const { asset, assetPropertiesState, assetDataRef, store, scene } = params;
+    const { asset, assetPropertiesState, assetDataState, store, scene } = params;
+    const [assetData, setAssetData] = assetDataState;
     const [assetProperties, setAssetProperties] = assetPropertiesState;
+
+    const faderScenes = useZustand((state) => state.fader.faderScenes);
+
+    const sceneLinkOptions = useMemo(() => {
+        if (faderScenes && scene) {
+            const sceneLinkOptions: Record<FaderSceneType['name'], FaderSceneType['id']> = {};
+
+            if (assetData.nextSceneId && assetData.nextSceneId !== 'none') {
+                sceneLinkOptions[faderScenes[assetData.nextSceneId].name] = assetData.nextSceneId;
+            }
+
+            sceneLinkOptions['none'] = 'none';
+
+            const otherScenes = Object.keys(faderScenes).filter(
+                (faderSceneId) => faderSceneId !== scene.id && faderSceneId !== assetData.nextSceneId
+            );
+            otherScenes.forEach((otherScene) => {
+                sceneLinkOptions[faderScenes[otherScene].name] = otherScene;
+            });
+
+            return sceneLinkOptions;
+        } else {
+            return { none: 'none' };
+        }
+    }, [faderScenes, scene]);
 
     const imageContent = {
         /* TODO this will need a custom plugin to display Files from a FaderStory's associated asset list (and also for audio/video/etc) */
@@ -39,20 +67,20 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
     const audioAndVideoContent = {
         autoPlay: {
             label: 'Autoplay',
-            value: assetDataRef.current.autoPlay,
+            value: assetData.autoPlay,
             onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
                 if (!initial) {
-                    assetDataRef.current = { ...assetDataRef.current, autoPlay: val };
+                    setAssetData({ ...assetData, autoPlay: val });
                 }
             },
             transient: false,
         },
         loop: {
             label: 'Loop',
-            value: assetDataRef.current.loop,
+            value: assetData.loop,
             onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
                 if (!initial) {
-                    assetDataRef.current = { ...assetDataRef.current, loop: val };
+                    setAssetData({ ...assetData, loop: val });
                 }
             },
             transient: false,
@@ -62,34 +90,76 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
     let contentControls = {
         headline: {
             label: 'Headline',
-            value: assetDataRef.current.headline,
+            value: assetData.headline,
             onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
                 if (!initial) {
-                    assetDataRef.current = { ...assetDataRef.current, headline: val };
+                    setAssetData({ ...assetData, headline: val });
                 }
             },
             transient: false,
         },
         body: {
             label: 'Body',
-            value: assetDataRef.current.body,
+            value: assetData.body,
             rows: true,
             onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
                 if (!initial) {
-                    assetDataRef.current = { ...assetDataRef.current, body: val };
+                    setAssetData({ ...assetData, body: val });
                 }
             },
             transient: false,
         },
         textColor: {
             label: 'Text Color',
-            value: assetDataRef.current.textColor,
+            value: assetData.textColor,
             onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
                 if (!initial) {
-                    assetDataRef.current = { ...assetDataRef.current, textColor: val };
+                    setAssetData({ ...assetData, textColor: val });
                 }
             },
             transient: false,
+        },
+    };
+
+    const sceneLinkControls = {
+        enableLink: {
+            label: 'Interactive Link to another Scene',
+            value: asset.group === 'SceneLink' ? true : false,
+            onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
+                if (!initial) {
+                    let updatedAsset: FaderSceneAssetType;
+
+                    if (val) {
+                        setAssetData({ ...assetData, nextSceneId: 'none' });
+
+                        updatedAsset = { ...asset, group: 'SceneLink', data: { ...assetData, nextSceneId: 'none' } };
+                    } else {
+                        const newGroupType = Object.keys(groupAndTypeLinks)[
+                            Object.values(groupAndTypeLinks).findIndex((type) => type === asset.type)
+                        ] as FaderAssetGroupType;
+
+                        setAssetData({ ...assetData, nextSceneId: '' });
+
+                        updatedAsset = {
+                            ...asset,
+                            group: newGroupType,
+                            data: { ...assetData, nextSceneId: '' },
+                        };
+                    }
+
+                    wrappers_UpdateStoryAssetInStoreAndRemote(updatedAsset, scene);
+                }
+            },
+        },
+        link: {
+            label: 'Link to Scene',
+            options: sceneLinkOptions,
+            onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
+                if (!initial) {
+                    setAssetData({ ...assetData, nextSceneId: val });
+                }
+            },
+            render: (get: (path: string) => boolean) => get('Content.enableLink'),
         },
     };
 
@@ -181,33 +251,33 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             {
                 backgroundOn: {
                     label: 'Use Background',
-                    value: assetDataRef.current.backgroundOn,
+                    value: assetData.backgroundOn,
                     onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, backgroundOn: val };
+                            setAssetData({ ...assetData, backgroundOn: val });
                         }
                     },
                     transient: false,
                 },
                 backgroundColor: {
                     label: 'Background Color',
-                    value: assetDataRef.current.backgroundColor,
+                    value: assetData.backgroundColor,
                     onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, backgroundColor: val };
+                            setAssetData({ ...assetData, backgroundColor: val });
                         }
                     },
                     transient: false,
                 },
                 backgroundOpacity: {
                     label: 'Background Opacity',
-                    value: assetDataRef.current.backgroundOpacity,
+                    value: assetData.backgroundOpacity,
                     min: 0,
                     max: 1,
                     step: 0.01,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, backgroundOpacity: val };
+                            setAssetData({ ...assetData, backgroundOpacity: val });
                         }
                     },
                     transient: false,
@@ -219,33 +289,33 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
             {
                 frameOn: {
                     label: 'Use Frame',
-                    value: assetDataRef.current.frameOn,
+                    value: assetData.frameOn,
                     onChange: (val: boolean, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, frameOn: val };
+                            setAssetData({ ...assetData, frameOn: val });
                         }
                     },
                     transient: false,
                 },
                 frameColor: {
                     label: 'Frame Color',
-                    value: assetDataRef.current.frameColor,
+                    value: assetData.frameColor,
                     onChange: (val: string, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, frameColor: val };
+                            setAssetData({ ...assetData, frameColor: val });
                         }
                     },
                     transient: false,
                 },
                 frameOpacity: {
                     label: 'Frame Opacity',
-                    value: assetDataRef.current.frameOpacity,
+                    value: assetData.frameOpacity,
                     min: 0,
                     max: 1,
                     step: 0.01,
                     onChange: (val: number, _path: string, { initial }: { initial: boolean }) => {
                         if (!initial) {
-                            assetDataRef.current = { ...assetDataRef.current, frameOpacity: val };
+                            setAssetData({ ...assetData, frameOpacity: val });
                         }
                     },
                     transient: false,
@@ -255,19 +325,40 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
         ),
     };
 
-    if (asset.group == 'Image2D') {
-        contentControls = { ...contentControls, ...imageContent };
-    } else if (asset.group == 'Audio' || asset.group == 'Video2D') {
-        contentControls = { ...contentControls, ...audioAndVideoContent };
+    switch (asset.group) {
+        case 'Image2D':
+            contentControls = { ...contentControls, ...imageContent, ...sceneLinkControls };
+            break;
+
+        case 'TextCard':
+            contentControls = { ...contentControls, ...sceneLinkControls };
+            break;
+
+        case 'SceneLink':
+            contentControls = { ...contentControls, ...sceneLinkControls };
+            break;
+
+        case 'Audio':
+            contentControls = { ...contentControls, ...audioAndVideoContent };
+            break;
+
+        case 'Video2D':
+            contentControls = { ...contentControls, ...audioAndVideoContent };
+            break;
+
+        default:
+            break;
     }
 
     const defaultControls = {
         // @ts-expect-error ...
         'Content': folder(contentControls, { order: 0, collapsed: false }),
 
-        'Display': folder(displayControls, { order: 1, collapsed: false }),
+        // 'SceneLink': folder(sceneLinkControls, { order: 1, collapsed: true }),
 
-        'Transforms': folder(transformControls, { order: 2, collapsed: false }),
+        'Display': folder(displayControls, { order: 2, collapsed: false }),
+
+        'Transforms': folder(transformControls, { order: 3, collapsed: false }),
 
         'Delete Story Asset from Scene': folder(
             {
@@ -284,7 +375,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
                     { disabled: false }
                 ),
             },
-            { order: 3, collapsed: true }
+            { order: 4, collapsed: true }
         ),
     };
 
@@ -518,9 +609,7 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                     ),
                 },
                 {
-                    render: (get) => {
-                        return get('Scene Settings.enableBg') as boolean;
-                    },
+                    render: (get) => get('Scene Settings.enableBg') as boolean,
                 }
             ),
         };

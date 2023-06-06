@@ -8,7 +8,7 @@ import useZustand from '../../lib/zustand/zustand';
 import { getSortedBackendAssetsByType } from '../../lib/methods/faderHelpers';
 import { generateRecordOfNamedBackendAssetIds } from '../../lib/hooks/useLevaControls';
 import { levaThemeValues, levaValuesForTw } from '../../style/levaTheme';
-import { FaderAssetGroupType, FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
+import { FaderAssetGroupType, FaderAssetType, FaderBackendAsset, FaderSceneType } from '../../types/FaderTypes';
 import AddAsset from './AddAsset';
 import AssetGroup from './AssetGroup';
 
@@ -115,8 +115,17 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
         (backendAssets: Record<string, FaderBackendAsset>, groupType: FaderAssetGroupType) => {
             const type = groupAndTypeLinks[groupType];
             if (type) {
-                const sortedBackendAssetsByType = getSortedBackendAssetsByType(backendAssets)[type];
-                const namedRecord = generateRecordOfNamedBackendAssetIds(sortedBackendAssetsByType);
+                let sortedBackendAssetsByType: Record<string, FaderBackendAsset>;
+                let namedRecord: Record<FaderBackendAsset['name'], FaderBackendAsset['id'] | null> = {};
+
+                if (Array.isArray(type) && type.length) {
+                    sortedBackendAssetsByType = getSortedBackendAssetsByType(backendAssets)[type[0]];
+                    namedRecord['none'] = null;
+                } else {
+                    sortedBackendAssetsByType = getSortedBackendAssetsByType(backendAssets)[type as FaderAssetType];
+                }
+                namedRecord = { ...namedRecord, ...generateRecordOfNamedBackendAssetIds(sortedBackendAssetsByType) };
+
                 return namedRecord;
             }
         },
@@ -134,7 +143,7 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
                 },
                 transient: false,
                 order: 0,
-                render: () => addAssetPanelOpts.assetGroupType !== 'TextCard',
+                render: () => addAssetPanelOpts.assetGroupType !== 'TextCard' && addAssetPanelOpts.assetGroupType !== 'SceneLink',
             },
             'Add to Scene': folder(
                 {
@@ -152,7 +161,16 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
                         { disabled: false }
                     ),
                 },
-                { render: (get) => (get('backendAssetSelect') || addAssetPanelOpts.assetGroupType == 'TextCard' ? true : false), order: 1 }
+                {
+                    render: (get) =>
+                        get('backendAssetSelect') ||
+                        get('backendAssetSelect') !== undefined ||
+                        addAssetPanelOpts.assetGroupType === 'TextCard' ||
+                        addAssetPanelOpts.assetGroupType === 'SceneLink'
+                            ? true
+                            : false,
+                    order: 1,
+                }
             ),
         },
         { store: addAssetLevaStore },

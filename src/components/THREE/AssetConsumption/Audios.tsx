@@ -2,7 +2,7 @@ import Hls from 'hls.js';
 import { useEffect, useRef, useState } from 'react';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
-import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
+import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 
 type AudiosProps = {
     scene: FaderSceneType;
@@ -52,7 +52,7 @@ const Audios = (props: AudiosProps) => {
 
 export default Audios;
 
-const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
+export const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) => {
     const hls = useRef({ hls: new Hls(), audioSource: backendAsset?.static_url });
     const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
@@ -69,14 +69,14 @@ const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
         }
     }, [audioRef]);
 
-    if (!backendAsset || !Hls.isSupported()) {
+    if (!backendAsset || !asset || !Hls.isSupported()) {
         return <></>;
     } else {
         return (
             <audio
                 /* set reference to element via setAudioRef callback: */
                 ref={setAudioRef}
-                className='block'
+                className='block h-fit w-fit'
                 controls
                 autoPlay={asset.data.autoPlay}
                 loop={asset.data.loop}

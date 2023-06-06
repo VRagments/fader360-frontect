@@ -166,4 +166,4 @@ export interface FaderVideoSubtitlesType {
 /* Renamed "Interactive" to "SceneLink" */
 export type FaderAssetGroupType = 'Video2D' | 'SceneLink' | 'Image2D' | 'TextCard' | 'Audio' | '360';
 
-export type FaderAssetType = 'Video' | 'Audio' | 'TextCard' | 'Image' | 'SceneLink';
+export type FaderAssetType = 'Video' | 'Audio' | 'TextCard' | 'Image';

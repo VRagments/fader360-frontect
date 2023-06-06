@@ -77,6 +77,16 @@ const useZustand = create<ZustandState>()(
                             (draftState) => {
                                 const draftFaderStoryAsset = draftState.fader.faderScenes![sceneId].data.assets[storyAsset.id];
 
+                                if (draftFaderStoryAsset.group !== storyAsset.group) {
+                                    const oldGroupOfIds =
+                                        draftState.fader.faderScenes![sceneId].data.assetOrderByGroup[draftFaderStoryAsset.group];
+                                    const oldGroupIndex = oldGroupOfIds.indexOf(storyAsset.id);
+                                    oldGroupOfIds.splice(oldGroupIndex, 1);
+
+                                    const newGroupOfIds = draftState.fader.faderScenes![sceneId].data.assetOrderByGroup[storyAsset.group];
+                                    newGroupOfIds.push(storyAsset.id);
+                                }
+
                                 draftState.fader.faderScenes![sceneId].data.assets[storyAsset.id] = {
                                     ...draftFaderStoryAsset,
                                     ...storyAsset,

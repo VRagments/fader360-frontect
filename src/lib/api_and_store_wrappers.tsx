@@ -155,6 +155,7 @@ export const wrappers_ViewerProjectSyncToStore = async (storyIdParam: FaderStory
 export const wrappers_UpdateStoryAssetInStoreAndRemote = (storyAsset: FaderSceneAssetType, scene: FaderSceneType) => {
     const asyncUpdateWrapper = async () => {
         storeUpdateFaderStoryAsset(storyAsset, scene.id);
+
         const updatedScene = useZustand.getState().fader.faderScenes![scene.id];
 
         await api_UpdateScene(updatedScene);

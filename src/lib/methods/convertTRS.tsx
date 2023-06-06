@@ -1,4 +1,5 @@
-import { Euler, MathUtils, Matrix4, Vector3 } from 'three';
+import { Camera, Euler, MathUtils, Matrix4, Vector3 } from 'three';
+import { FaderSceneAssetType } from '../../types/FaderTypes';
 
 /* Notes on "conversion" from Fader backend data (type FaderStoryAsset) to THREE scene pos/rot/scale :
  * - Fader "Position Vertical":     Up/down along radius around user    --> properties.rotationX; "Phi" in #L29
@@ -81,3 +82,28 @@ const convertRotation = (assetRotation: [number, number, number], assetPosition:
 
     return new Euler().setFromRotationMatrix(finalRotMatrix);
 };
+
+/** Wrapper for converting old-school Fader transforms to THREE space */
+export function convertTRSWrapper(assetProperties: FaderSceneAssetType['properties'], cameraPos: Camera['position']) {
+    const newTRS = convertTRS({
+        position: {
+            x: assetProperties.positionX,
+            y: assetProperties.positionY,
+            z: assetProperties.positionZ,
+        },
+        rotation: {
+            x: assetProperties.rotationX,
+            y: assetProperties.rotationY,
+            z: assetProperties.rotationZ,
+        },
+        scale: {
+            uniformScale: assetProperties.scale,
+            x: assetProperties.scaleX,
+            y: assetProperties.scaleY,
+            z: assetProperties.scaleZ,
+        },
+        userPosition: { x: cameraPos.x, y: cameraPos.y, z: cameraPos.z },
+    });
+
+    return newTRS;
+}

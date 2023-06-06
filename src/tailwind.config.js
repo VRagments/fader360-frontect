@@ -20,10 +20,16 @@ module.exports = {
             borderRadius: {
                 inherit: 'inherit',
             },
+            transitionProperty: {
+                width: 'width',
+            },
+            justifyContent: {
+                initial: 'initial',
+            },
         },
     },
     corePlugins: {
-        aspectRatio: false,
+        aspectRatio: true,
     },
     variants: {
         extend: {

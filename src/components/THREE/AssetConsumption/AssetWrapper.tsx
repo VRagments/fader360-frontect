@@ -3,11 +3,10 @@ import { useThree } from '@react-three/fiber';
 import { useCreateStore } from 'leva';
 import { debounce } from 'lodash';
 import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
-import { Camera } from 'three';
 import { wrappers_UpdateStoryAssetInStoreAndRemote } from '../../../lib/api_and_store_wrappers';
 import useZustand from '../../../lib/zustand/zustand';
 import { mergeHexAndOpacityValues } from '../../../lib/methods/colorHelpers';
-import { convertTRS } from '../../../lib/methods/convertTRS';
+import { convertTRSWrapper } from '../../../lib/methods/convertTRS';
 import { useControlsWrapperAssetProperties } from '../../../lib/hooks/useLevaControls';
 import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType } from '../../../types/FaderTypes';
 import { LevaPanelOptions } from '../../../types/ZustandTypes';
@@ -19,10 +18,28 @@ type AssetWrapperProps = {
     scene: FaderSceneType;
     asset: FaderSceneAssetType;
     backendAsset?: FaderBackendAsset;
-    assetJsxElement: (params: AssetJsxElementParams) => JSX.Element;
+    assetJsxElement: (params: AssetJsxElementProps) => JSX.Element;
+    userRootElement?: {
+        additionalClassNames: string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onClickCallback: (...args: any[]) => void;
+    };
     viewMode: boolean;
 };
-const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }: AssetWrapperProps) => {
+const AssetWrapper = (props: AssetWrapperProps) => {
+    const {
+        scene,
+        asset,
+        backendAsset,
+        assetJsxElement,
+        userRootElement = {
+            additionalClassNames: '',
+            onClickCallback: () => null,
+        },
+        viewMode,
+    } = props;
+    const { additionalClassNames, onClickCallback } = userRootElement;
+
     const cameraPos = useThree((state) => state.camera.position);
     const assetPropertiesRef = useRef<FaderSceneAssetType['properties']>(asset.properties);
     const assetDataRef = useRef<FaderSceneAssetType['data']>(asset.data);
@@ -33,6 +50,8 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
         assetDataRef.current = asset.data;
     }, []);
 
+    const assetDataState = useState(assetDataRef.current);
+    const [assetData] = assetDataState;
     const assetPropertiesState = useState(assetPropertiesRef.current);
     const [assetProperties] = assetPropertiesState;
 
@@ -41,7 +60,7 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
 
     return (
         <Html
-            /* 'className' and 'style' affect the otherwise empty parent div, 'wrapperClass' affects the root div used for transforms: */
+            /* 'className' and 'style' affect the otherwise empty direct parent div, 'wrapperClass' affects the root div used for transforms: */
             key={asset.id}
             position={convertedTRSMemoized.positionConverted}
             rotation={convertedTRSMemoized.rotationConverted}
@@ -49,43 +68,56 @@ const AssetWrapper = ({ scene, asset, backendAsset, assetJsxElement, viewMode }:
             transform
             zIndexRange={[19, 0]}
             occlude={false}
-            className='box-content flex max-w-lg select-none flex-col content-center items-center overflow-hidden rounded-md p-2 text-center outline-none will-change-transform'
-            wrapperClass=''
+            className={'group'}
             style={{
-                color: assetDataRef.current.textColor,
-                backgroundColor: assetDataRef.current.backgroundOn
-                    ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                    : 'transparent',
-                boxShadow: `0px 0px 0px 0.15rem ${mergeHexAndOpacityValues(
-                    assetDataRef.current.frameColor,
-                    assetDataRef.current.frameOpacity
-                )}`,
                 transform: `scale3d(${scaleFactor}, ${scaleFactor}, ${scaleFactor})`, // see scaleFactor, Line 15
             }}
         >
-            {assetDataRef.current.headline && (
-                <div
-                    id={`panel headline ${asset.id}`}
-                    className='bold mb-1 w-full rounded p-1 px-2 text-lg'
-                    style={{
-                        backgroundColor: assetDataRef.current.backgroundOn
-                            ? mergeHexAndOpacityValues(assetDataRef.current.backgroundColor, assetDataRef.current.backgroundOpacity)
-                            : 'transparent',
-                    }}
-                >
-                    {assetDataRef.current.headline}
-                </div>
-            )}
+            <div
+                id={`userRoot Element of Html 'Panel': ${asset.group} (${asset.type}) - asset name: ${assetData.name} - asset id: ${
+                    asset.id
+                } ${backendAsset && ` - backendAsset id: ${backendAsset.id}`}`}
+                className={
+                    'box-content flex max-h-fit max-w-lg cursor-pointer select-none flex-col items-center justify-between overflow-hidden rounded-md p-2 text-center outline-none will-change-transform ' +
+                    additionalClassNames
+                }
+                onClick={(ev) => {
+                    onClickCallback(ev);
+                }}
+                style={{
+                    color: assetData.textColor,
+                    backgroundColor: assetData.backgroundOn
+                        ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
+                        : 'transparent',
+                    boxShadow: `0px 0px 0px 0.15rem ${mergeHexAndOpacityValues(assetData.frameColor, assetData.frameOpacity)}`,
+                }}
+            >
+                {assetData.headline && (
+                    <div
+                        id={`panel headline ${asset.id}`}
+                        className='bold mb-1 w-auto rounded p-1 px-2 text-lg'
+                        style={{
+                            backgroundColor: assetData.backgroundOn
+                                ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
+                                : 'transparent',
+                        }}
+                    >
+                        {assetData.headline}
+                    </div>
+                )}
 
-            {assetJsxElement({ asset, assetDataRef, backendAsset })}
+                {assetJsxElement({ asset, assetDataRef, backendAsset, viewMode })}
 
-            {assetDataRef.current.body && (
-                <div id={`panel body ${asset.id}`} className='whitespace-pre-wrap'>
-                    {assetDataRef.current.body}
-                </div>
-            )}
+                {assetData.body && (
+                    <div id={`panel body ${asset.id}`} className='whitespace-pre-wrap'>
+                        {assetData.body}
+                    </div>
+                )}
 
-            {!viewMode && <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataRef={assetDataRef} />}
+                {!viewMode && (
+                    <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataState={assetDataState} />
+                )}
+            </div>
         </Html>
     );
 };
@@ -96,19 +128,20 @@ type EditModePropsType = {
     scene: FaderSceneType;
     asset: FaderSceneAssetType;
     assetPropertiesState: [FaderSceneAssetType['properties'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['properties']>>];
-    assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
+    assetDataState: [FaderSceneAssetType['data'], React.Dispatch<React.SetStateAction<FaderSceneAssetType['data']>>];
 };
 
 /** Loads Leva panel for indivual asset settings in Edit mode  */
 const EditMode = (props: EditModePropsType) => {
-    const { scene, asset, assetDataRef, assetPropertiesState } = props;
+    const { scene, asset, assetPropertiesState, assetDataState } = props;
+    const [assetData] = assetDataState;
     const [assetProperties] = assetPropertiesState;
 
     const levaSingleAssetPanels = useZustand((state) => state.fader.faderLevaPanels);
     const { storeAddLevaPanel } = useZustand((state) => state.methods);
 
     const store = useCreateStore();
-    useControlsWrapperAssetProperties({ asset, assetDataRef, store, scene, assetPropertiesState });
+    useControlsWrapperAssetProperties({ asset, store, scene, assetPropertiesState, assetDataState });
 
     /* set Leva panel */
     useEffect(() => {
@@ -132,11 +165,11 @@ const EditMode = (props: EditModePropsType) => {
     const updatedStoryAssetDataMemo = useMemo(() => {
         const updatedStoryAssetData = {
             ...asset,
-            data: { ...asset.data, ...assetDataRef.current },
+            data: { ...asset.data, ...assetData },
         };
 
         return updatedStoryAssetData;
-    }, [assetDataRef.current]);
+    }, [assetData]);
 
     /** Updates Story Asset after a 'debounced' amount of Milliseconds: */
     const debouncedAddOrUpdateStoryAsset = useCallback((updatedStoryAsset: FaderSceneAssetType, debounceValueMs: number) => {
@@ -153,45 +186,22 @@ const EditMode = (props: EditModePropsType) => {
     /* Headline text, Frame/BG colors etc: */
     useEffect(() => {
         debouncedAddOrUpdateStoryAsset(updatedStoryAssetDataMemo, 150);
-    }, [assetDataRef.current]);
+    }, [updatedStoryAssetDataMemo]);
 
     return null;
 };
 
-export type AssetJsxElementParams = {
-    asset: FaderSceneAssetType;
+export type AssetJsxElementProps = {
+    asset?: FaderSceneAssetType;
     backendAsset?: FaderBackendAsset;
-    assetDataRef: React.MutableRefObject<FaderSceneAssetType['data']>;
+    assetDataRef?: React.MutableRefObject<FaderSceneAssetType['data']>;
+    viewMode?: boolean;
 };
 
 /*
  * Functions
  */
 
-/** Wrapper for converting old-school Fader transforms to THREE space */
-function convertTRSWrapper(assetProperties: FaderSceneAssetType['properties'], cameraPos: Camera['position']) {
-    const newTRS = convertTRS({
-        position: {
-            x: assetProperties.positionX,
-            y: assetProperties.positionY,
-            z: assetProperties.positionZ,
-        },
-        rotation: {
-            x: assetProperties.rotationX,
-            y: assetProperties.rotationY,
-            z: assetProperties.rotationZ,
-        },
-        scale: {
-            uniformScale: assetProperties.scale,
-            x: assetProperties.scaleX,
-            y: assetProperties.scaleY,
-            z: assetProperties.scaleZ,
-        },
-        userPosition: { x: cameraPos.x, y: cameraPos.y, z: cameraPos.z },
-    });
-
-    return newTRS;
-}
 
 function containsObject(obj: LevaPanelOptions, arr: LevaPanelOptions[]) {
     return arr.some((elem) => elem.id === obj.id);

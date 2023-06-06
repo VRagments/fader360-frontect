@@ -1,8 +1,7 @@
 import { FaderBackendAsset, FaderSceneType, FaderVideoSubtitlesType } from '../../../types/FaderTypes';
-import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
+import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 import Hls from 'hls.js';
 import { useEffect, useRef, useState } from 'react';
-import { defaultCardWidth, defaultCardHeight } from '../../../lib/defaults';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 import { api_ListAssetSubtitles, api_ListPublicAssetSubtitles } from '../../../lib/axios';
 import { cloneDeep } from 'lodash';
@@ -71,8 +70,8 @@ const Videos2d = (props: Videos2dProps) => {
 
 export default Videos2d;
 
-const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
-    if (!backendAsset || !Hls.isSupported()) {
+export const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) => {
+    if (!backendAsset || !asset || !Hls.isSupported()) {
         return <></>;
     }
 
@@ -112,8 +111,7 @@ const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementParams) => {
             loop={asset.data.loop}
             crossOrigin='anonymous'
             disablePictureInPicture
-            width={Math.min(backendAsset.attributes.width, defaultCardWidth)}
-            height={Math.min(backendAsset.attributes.height, defaultCardHeight)}
+            className='min-w-full'
             poster={backendAsset.preview_image as string}
         >
             Your device does not support this form of video playback!

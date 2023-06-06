@@ -11,10 +11,6 @@ import {
 
 /* Asset Consumption & Display */
 
-/* multiples of 16:9 */
-export const defaultCardWidth = 480;
-export const defaultCardHeight = 270;
-
 /* BG Sphere */
 export const backgroundSphereGeometryArgs: [number, number, number] = [100, 64, 64]; // first arg does sort of 'zoom' (sphere radius)
 
@@ -23,7 +19,7 @@ export const backgroundSphereGeometryArgs: [number, number, number] = [100, 64, 
 /* Stories and Scenes */
 
 export const arrayOfFaderAssetGroupTypes: FaderAssetGroupType[] = ['Video2D', 'SceneLink', 'Image2D', 'TextCard', 'Audio', '360'];
-export const arrayOfFaderAssetTypes: FaderAssetType[] = ['Video', 'SceneLink', 'Image', 'TextCard', 'Audio'];
+export const arrayOfFaderAssetTypes: FaderAssetType[] = ['Video', 'Image', 'TextCard', 'Audio'];
 
 export const defaultSceneData: FaderSceneDataType = {
     assetIds: [],

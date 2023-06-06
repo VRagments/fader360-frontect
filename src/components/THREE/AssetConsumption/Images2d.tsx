@@ -1,6 +1,5 @@
-import { defaultCardHeight, defaultCardWidth } from '../../../lib/defaults';
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
-import AssetWrapper, { AssetJsxElementParams } from './AssetWrapper';
+import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 
 type Images2dProps = {
     scene: FaderSceneType;
@@ -38,17 +37,10 @@ const Images2d = (props: Images2dProps) => {
 
 export default Images2d;
 
-const Image2dJsxElement = ({ backendAsset }: AssetJsxElementParams) => {
+export const Image2dJsxElement = ({ backendAsset }: AssetJsxElementProps) => {
     if (!backendAsset) {
         return <></>;
     }
 
-    return (
-        <img
-            draggable={false}
-            src={backendAsset.static_url}
-            width={Math.min(backendAsset.attributes.width, defaultCardWidth)}
-            height={Math.min(backendAsset.attributes.height, defaultCardHeight)}
-        />
-    );
+    return <img draggable={false} src={backendAsset.static_url} className='h-fit w-fit object-cover' />;
 };

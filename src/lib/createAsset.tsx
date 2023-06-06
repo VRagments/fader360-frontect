@@ -13,7 +13,18 @@ const createAsset = (groupType: FaderAssetGroupType, backendAsset?: FaderBackend
     newAsset.data.headline = `New ${groupType} Asset ${groupTypeCounter(groupType)}`;
 
     newAsset.group = groupType;
-    newAsset.type = groupAndTypeLinks[groupType];
+
+    const newAssetType = groupAndTypeLinks[groupType];
+    if (Array.isArray(newAssetType) && newAssetType.length) {
+        if (groupType === 'SceneLink') {
+            newAsset.type = 'TextCard';
+        } else {
+            // WARN until I find a better solution:
+            newAsset.type = newAssetType[0];
+        }
+    } else {
+        newAsset.type = newAssetType as FaderAssetType;
+    }
 
     if (backendAsset) {
         newAsset.backendId = backendAsset.id;
@@ -31,13 +42,13 @@ const groupTypeCounts = (() => {
     return groupTypeCountRecord as Record<FaderAssetGroupType, number>;
 })();
 
-type FaderAssetGroup360Type = { '360': 'Image' | 'Video' };
-export const groupAndTypeLinks: Omit<Record<FaderAssetGroupType, FaderAssetType>, '360'> & FaderAssetGroup360Type = {
+type FaderAssetGroupTypes = { '360': FaderAssetType[]; 'SceneLink': FaderAssetType[] };
+export const groupAndTypeLinks: Omit<Record<FaderAssetGroupType, FaderAssetType>, '360' | 'SceneLink'> & FaderAssetGroupTypes = {
     'TextCard': 'TextCard',
     'Audio': 'Audio',
-    '360': 'Image', // or 'Video'
+    '360': ['Image', 'Video'],
     'Video2D': 'Video',
-    'SceneLink': 'SceneLink',
+    'SceneLink': ['Image', 'TextCard'],
     'Image2D': 'Image',
 };
 
