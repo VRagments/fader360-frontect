@@ -33,7 +33,12 @@ export const FaderScene = (props: FaderSceneProps) => {
     return (
         <group name={'THREE (R3F) Canvas First Subgroup'}>
             {currentScene.data.environment.preset && (
-                <Background scene360BackendAssets={scene360BackendAssets} backgroundEnvironment={currentScene.data.environment} />
+                <Background
+                    scene360BackendAssets={scene360BackendAssets}
+                    backgroundEnvironment={currentScene.data.environment}
+                    viewMode={viewMode}
+                    projectId={currentScene.project_id}
+                />
             )}
             {currentScene.data.assetOrderByGroup['360']?.length && (
                 <Environments

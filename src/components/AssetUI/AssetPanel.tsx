@@ -53,29 +53,34 @@ const AssetPanel = ({ setOpenPanel, currentScene, selectedAssetState, addAssetPa
                 </div>
                 <div className='flex flex-col items-center py-1'>
                     {arrayOfFaderAssetGroupTypes.map((groupType, idx) => {
-                        return (
-                            <div
-                                key={`${groupType} - ${idx}`}
-                                className={'relative flex w-full flex-col items-center' + levaValuesForTw.fontSizes.root}
-                            >
+                        /* WARN Display of '360' Group disabled for now (non-functional): */
+                        if (groupType === '360') {
+                            return null;
+                        } else {
+                            return (
                                 <div
-                                    className={
-                                        'w-full self-start px-1 pl-2' +
-                                        levaValuesForTw.colors.elevation2.bg +
-                                        levaValuesForTw.colors.folderTextColor.text
-                                    }
+                                    key={`${groupType} - ${idx}`}
+                                    className={'relative flex w-full flex-col items-center' + levaValuesForTw.fontSizes.root}
                                 >
-                                    {groupType}
-                                </div>
-                                <AssetGroup
-                                    assetGroup={currentScene.data.assetOrderByGroup[groupType]}
-                                    sceneAssets={currentScene.data.assets}
-                                    selectedAssetState={selectedAssetState}
-                                />
+                                    <div
+                                        className={
+                                            'w-full self-start px-1 pl-2' +
+                                            levaValuesForTw.colors.elevation2.bg +
+                                            levaValuesForTw.colors.folderTextColor.text
+                                        }
+                                    >
+                                        {groupType}
+                                    </div>
+                                    <AssetGroup
+                                        assetGroup={currentScene.data.assetOrderByGroup[groupType]}
+                                        sceneAssets={currentScene.data.assets}
+                                        selectedAssetState={selectedAssetState}
+                                    />
 
-                                <AddAsset groupType={groupType} addAssetPanelState={addAssetPanelState} />
-                            </div>
-                        );
+                                    <AddAsset groupType={groupType} addAssetPanelState={addAssetPanelState} />
+                                </div>
+                            );
+                        }
                     })}
                 </div>
             </div>

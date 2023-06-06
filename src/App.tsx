@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 import Nav from './components/Nav';
-import FaderStoryEditor from './pages/FaderStoryEditor';
-import FaderStoryViewer from './pages/FaderStoryViewer';
 import { useEffect, useState } from 'react';
 import { FaderStoryType } from './types/FaderTypes';
 import useZustand from './lib/zustand/zustand';
 import buildConfig from './buildConfig';
+import FaderStory from './pages/FaderStory';
 
 function App() {
     const [storyId, setStoryId] = useState<FaderStoryType['id'] | null>(null);
@@ -18,8 +17,8 @@ function App() {
             <BrowserRouter basename={process.env.PUBLIC_URL}>
                 <GetSearchParams setStoryId={setStoryId} setDebug={setDebug} />
                 <Routes>
-                    <Route path='view' element={<FaderStoryViewer storyId={storyId} />} />
-                    <Route path='edit' element={<FaderStoryEditor storyId={storyId} debug={debug} />} />
+                    <Route path='view' element={<FaderStory mode={'view'} storyId={storyId} debug={debug} />} />
+                    <Route path='edit' element={<FaderStory mode={'edit'} storyId={storyId} debug={debug} />} />
                     <Route
                         path='*'
                         element={<h1 className='text-white'>File not found! Please pick a different destination via navigation menu</h1>}

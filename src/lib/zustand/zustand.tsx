@@ -1,4 +1,3 @@
-import { StoreType } from 'leva/dist/declarations/src/types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -127,7 +126,7 @@ const useZustand = create<ZustandState>()(
                             'storeAddLevaPanel'
                         );
                     },
-                    storeSetFaderLevaOptionsStore: (optionsStore: StoreType) => {
+                    storeSetFaderLevaOptionsStore: (optionsStore) => {
                         set(
                             (draftState) => {
                                 draftState.fader.faderLevaOptionsStore = optionsStore;
@@ -136,9 +135,31 @@ const useZustand = create<ZustandState>()(
                             'storeSetFaderLevaOptionsStore'
                         );
                     },
+                    storeSetViewModeSettings: (viewModeSettings) => {
+                        set(
+                            (draftState) => {
+                                draftState.siteData.viewModeSettings = { ...draftState.siteData.viewModeSettings, ...viewModeSettings };
+                            },
+                            false,
+                            'storeSetViewModeSettings'
+                        );
+                    },
+                    storeSetActiveSubtitle: (subtitleCue) => {
+                        set(
+                            (draftState) => {
+                                draftState.fader.activeSubtitle = subtitleCue;
+                            },
+                            false,
+                            'storeSetActiveSubtitle'
+                        );
+                    },
                 },
                 siteData: {
-                    // TODO unused
+                    viewModeSettings: {
+                        subtitles: true,
+                        subtitleLanguagesAvailable: [],
+                        subtitleLanguage: '',
+                    },
                 },
                 fader: {
                     faderStory: null,
@@ -147,6 +168,8 @@ const useZustand = create<ZustandState>()(
                     faderStoryBackendAssets: {},
                     faderLevaPanels: [],
                     faderLevaOptionsStore: null,
+                    activeSubtitle:
+                        undefined /* undefined: disabled; null: enabled but currently text to display; string: subtitle displayed */,
                 },
             };
 

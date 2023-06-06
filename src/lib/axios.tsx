@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ApiListResponse } from '../types/ApiTypes';
-import { FaderBackendAsset, FaderSceneType, FaderStoryType } from '../types/FaderTypes';
+import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderVideoSubtitlesType } from '../types/FaderTypes';
 import buildConfig from '../buildConfig';
 
 const api = axios.create();
@@ -34,7 +34,18 @@ export const api_ListBackendAssetsAssociatedWithProject = async (project_id: str
         .then((result: AxiosResponse<ApiListResponse<FaderBackendAsset>>) => {
             return result.data.objects;
         })
-        .catch((err) => handleAxiosError(err, 'GET api_ListBackendAssetsAssociatedWithProject'));
+        .catch((err) => {
+            handleAxiosError(err, 'GET api_ListBackendAssetsAssociatedWithProject');
+        });
+};
+
+export const api_ListAssetSubtitles = async (assetId: string) => {
+    return await api
+        .get(`${apiBaseUrl}/assets/${assetId}/asset_subtitles`)
+        .then((result: AxiosResponse<ApiListResponse<FaderVideoSubtitlesType>>) => {
+            return result.data.objects;
+        })
+        .catch((err) => handleAxiosError(err, 'GET api_ListAssetSubtitles'));
 };
 
 /** PUTs/updates FaderProject  */
@@ -81,6 +92,15 @@ export const api_ListBackendAssetsAssociatedWithPublicProject = async (project_i
         .catch((err) => handleAxiosError(err, 'GET api_ListBackendAssetsAssociatedWithPublicProject'));
 };
 
+export const api_ListPublicAssetSubtitles = async (projectId: string, assetId: string) => {
+    return await api
+        .get(`${apiBaseUrl}/public/projects/${projectId}/assets/${assetId}/asset_subtitles`)
+        .then((result: AxiosResponse<ApiListResponse<FaderVideoSubtitlesType>>) => {
+            return result.data.objects;
+        })
+        .catch((err) => handleAxiosError(err, 'GET api_ListPublicAssetSubtitles'));
+};
+
 /** GET list of all scenes in a public Project/FaderStory */
 export const api_ListPublicProjectScenes = async (project_id: string) => {
     return await api
@@ -90,6 +110,7 @@ export const api_ListPublicProjectScenes = async (project_id: string) => {
         })
         .catch((err) => handleAxiosError(err, 'GET api_ListPublicProjectScenes'));
 };
+
 
 /**
  * Functions:

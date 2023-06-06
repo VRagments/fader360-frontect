@@ -89,6 +89,7 @@ export interface FaderSceneAssetType {
         name: string /* Added by myself to store name from FaderBackendAsset */;
         nextSceneId: string;
         textColor: string;
+        subtitles: FaderVideoSubtitlesType[] | null;
     };
     display: {
         caption: string; // This will be superseded by 'headline', or rather 'body'
@@ -127,13 +128,15 @@ export interface FaderSceneAssetBlueprint {
 
 // TODO should an entry for FaderAssetGroupType or at least FaderAssetType be in here?
 export interface FaderBackendAsset {
+    /** Actual backend id (also used in static_url etc) */
+    asset_id: string;
     attributes: {
         duration: number;
         file_size: number;
         height: number;
         width: number;
     };
-    /** Backend Id */
+    /** "Asset Lease" Id */
     id: string;
     inserted_at: string; // some Date format actually?
     lowres_image: string | null;
@@ -146,6 +149,18 @@ export interface FaderBackendAsset {
     status: string;
     thumbnail_image: string;
     updated_at: string; // some Date format actually?
+}
+
+export interface FaderVideoSubtitlesType {
+    asset_id: FaderBackendAsset['id'];
+    created_at: string;
+    id: string;
+    language: string;
+    name: string;
+    static_path: string;
+    static_url: string;
+    updated_at: string;
+    version: string;
 }
 
 /* Renamed "Interactive" to "SceneLink" */

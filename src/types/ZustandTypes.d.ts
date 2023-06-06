@@ -3,7 +3,11 @@ import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderSceneAssetType,
 
 export interface ZustandState {
     siteData: {
-        //
+        viewModeSettings: {
+            subtitles: boolean;
+            subtitleLanguagesAvailable: string[];
+            subtitleLanguage: string;
+        };
     };
     methods: {
         storeSetCurrentSceneId: (scene_id: FaderSceneType['id']) => void;
@@ -21,6 +25,8 @@ export interface ZustandState {
         storeDeleteFaderStoryAsset: (storyAsset: FaderSceneAssetType, sceneId: FaderSceneType['id']) => void;
         storeAddLevaPanel: (levaPanel: LevaPanelOptions, replace?: boolean) => void;
         storeSetFaderLevaOptionsStore: (optionsStore: StoreType) => void;
+        storeSetViewModeSettings: (viewModeSettings: Partial<ZustandState['siteData']['viewModeSettings']>) => void;
+        storeSetActiveSubtitle: (subtitleCue: string | null | undefined) => void;
     };
     fader: {
         faderStory: FaderStoryType | null;
@@ -29,6 +35,7 @@ export interface ZustandState {
         faderStoryBackendAssets: Record<string, FaderBackendAsset>;
         faderLevaPanels: LevaPanelOptions[];
         faderLevaOptionsStore: StoreType | null;
+        activeSubtitle: string | null | undefined;
     };
 }
 

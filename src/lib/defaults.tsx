@@ -110,6 +110,7 @@ export const defaultAssetData: FaderSceneAssetType['data'] = {
     name: '',
     nextSceneId: '',
     textColor: '#ffffff' /* non-empty so leva understands this as a color field */,
+    subtitles: null,
 };
 
 export const defaultAssetDisplay: FaderSceneAssetType['display'] = {

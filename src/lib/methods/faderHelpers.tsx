@@ -129,3 +129,7 @@ export const setSceneOrderOfScene = (
         return sceneOrderArray;
     }
 };
+
+export const getBackendAssetIdFromUrl = (assetUrl: string) => {
+    return assetUrl.match('media/(,?.*)/(,?.*)')![1];
+};

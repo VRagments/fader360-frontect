@@ -25,6 +25,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# jens' attempt to make running new_darth less of a hassle :)
+# jens' attempt to make running new_darth less of a hassle, and other files :)
 runNewDarth.sh
 docker/work/
+todo.md

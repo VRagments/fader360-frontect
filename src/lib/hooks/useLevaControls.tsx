@@ -320,6 +320,13 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
             ...getBackendAssetsFromStoryAssetsByGroupType('Video2D', scene.data.assets, backendAssets),
         });
 
+        /* Additionally, check if Scene Background is a video, and add to audioAndVideoBackendAssetsInScene */
+        if (scene.data.environment.preset) {
+            if (backendAssets[scene.data.environment.preset].media_type.includes('video')) {
+                audioAndVideoBackendAssetsInScene.push(backendAssets[scene.data.environment.preset]);
+            }
+        }
+
         let longestDuration = 0;
         audioAndVideoBackendAssetsInScene.forEach((backendAsset) => {
             longestDuration = Math.max(longestDuration, backendAsset.attributes.duration);
@@ -390,12 +397,16 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
             sceneDuration: {
                 label: 'Scene Duration',
                 value: parseFloat(sceneDuration),
-                min: longestAudioAndVideoAssetDuration,
                 step: 0.01,
                 pad: 1,
-                onChange: (value: FaderSceneType['duration'], _path: string, { initial }: { initial: boolean }) => {
+                onChange: (value: number, _path: string, { initial }: { initial: boolean }) => {
                     if (!initial) {
-                        setSceneDuration(value.toString());
+                        if (value >= longestAudioAndVideoAssetDuration) {
+                            setSceneDuration(value.toString());
+                        } else {
+                            // WARN silently sets sceneDuration to sensible value, only updates in Leva once it's re-opened
+                            setSceneDuration(longestAudioAndVideoAssetDuration.toString());
+                        }
                     }
                 },
                 transient: false,
