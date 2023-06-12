@@ -38,9 +38,9 @@ docker-tag: ## tag local docker image
 .PHONY: docker-build
 docker-build: ## build docker based image for distribution
 	rsync --verbose --human-readable --progress --archive --compress --delete \
-		--exclude 'node_modules' fader_testStory_api_response.json \
-		postcss.config.js tailwind.config.js tsconfig.json Makefile src \
-		package.json yarn.lock public .eslintrc.js nginx.conf docker/work/
+		--exclude 'node_modules' postcss.config.js tailwind.config.js \
+		package.json yarn.lock public .eslintrc.js tsconfig.json Makefile src \
+		nginx.conf docker/work/
 	ENV=${ENV} \
 	DOCKER_IMAGE=${DOCKER_IMAGE} \
 	DOCKER_TAG=${DOCKER_TAG} \
@@ -50,9 +50,9 @@ docker-build: ## build docker based image for distribution
 .PHONY: docker-run
 docker-run:
 	rsync --verbose --human-readable --progress --archive --compress --delete \
-		--exclude 'node_modules' fader_testStory_api_response.json \
-		postcss.config.js tailwind.config.js tsconfig.json Makefile src \
-		package.json yarn.lock public .eslintrc.js nginx.conf docker/work/
+		--exclude 'node_modules' postcss.config.js tailwind.config.js \
+		package.json yarn.lock public .eslintrc.js tsconfig.json Makefile src \
+		nginx.conf docker/work/
 	ENV=${ENV} \
 	DOCKER_IMAGE=${DOCKER_IMAGE} \
 	DOCKER_TAG=${DOCKER_TAG} \
