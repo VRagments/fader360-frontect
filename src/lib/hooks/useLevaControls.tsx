@@ -387,6 +387,7 @@ const backgroundSphereRadius = backgroundSphereGeometryArgs[0];
 export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSceneType) => {
     const faderStory = useZustand((state) => state.fader.faderStory);
 
+
     const faderScenesOrder = faderStory!.data.sceneOrder;
     const currentScenePlaceInSceneOrder = faderScenesOrder.findIndex((sceneId) => sceneId === scene.id);
     if (currentScenePlaceInSceneOrder === -1) {
@@ -553,7 +554,10 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
                         options: namedEnvironmentBackendAssetIdRecord,
                         value: backgroundSelectValue,
                         onChange: (value: FaderBackendAsset['id'], _path: string, { initial }) => {
-                            !initial && setBackgroundSelectValue(value);
+                            if (!initial) {
+                                setBackgroundSelectValue(value);
+
+                            }
                         },
                         transient: false,
                     },

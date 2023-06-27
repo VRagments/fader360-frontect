@@ -111,7 +111,6 @@ export const api_ListPublicProjectScenes = async (project_id: string) => {
         .catch((err) => handleAxiosError(err, 'GET api_ListPublicProjectScenes'));
 };
 
-
 /**
  * Functions:
  */

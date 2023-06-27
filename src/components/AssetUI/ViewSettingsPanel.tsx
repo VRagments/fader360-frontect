@@ -36,8 +36,8 @@ const ViewSettingsPanel = () => {
 export default ViewSettingsPanel;
 
 const ViewSettings = () => {
-    const viewModeSettings = useZustand((state) => state.siteData.viewModeSettings);
-    const storeSetViewModeSettings = useZustand((state) => state.methods.storeSetViewModeSettings);
+    const videoSettings = useZustand((state) => state.siteData.videoSettings);
+    const storeSetvideoSettings = useZustand((state) => state.methods.storeSetvideoSettings);
 
     const activeSubtitle = useZustand((state) => state.fader.activeSubtitle);
 
@@ -52,17 +52,17 @@ const ViewSettings = () => {
                         <input
                             id='subtitle-checkbox'
                             type='checkbox'
-                            checked={viewModeSettings.subtitles}
+                            checked={videoSettings.subtitles}
                             className='w-4 rounded border-gray-300 bg-gray-100 align-middle text-blue-600 focus:ring-2 focus:ring-blue-500'
                             onChange={() => {
-                                storeSetViewModeSettings({
-                                    subtitles: !viewModeSettings.subtitles,
+                                storeSetvideoSettings({
+                                    subtitles: !videoSettings.subtitles,
                                 });
                             }}
                         />
                     </div>
 
-                    {viewModeSettings.subtitles && viewModeSettings.subtitleLanguagesAvailable.length > 0 && (
+                    {videoSettings.subtitles && videoSettings.subtitleLanguagesAvailable.length > 0 && (
                         <div className='relative mt-2 w-full'>
                             <label htmlFor='subtitle-languages' className='mb-1 mr-auto mt-2'>
                                 Select Subtitle Language
@@ -70,12 +70,12 @@ const ViewSettings = () => {
                             <select
                                 id='subtitle-languages'
                                 className='absolute right-0 w-1/4 rounded-md border border-gray-300 bg-gray-50 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 '
-                                value={viewModeSettings.subtitleLanguage}
+                                value={videoSettings.subtitleLanguage}
                                 onChange={(ev) => {
-                                    storeSetViewModeSettings({ subtitleLanguage: ev.target.value });
+                                    storeSetvideoSettings({ subtitleLanguage: ev.target.value });
                                 }}
                             >
-                                {viewModeSettings.subtitleLanguagesAvailable.map((subtitleLang, idx) => (
+                                {videoSettings.subtitleLanguagesAvailable.map((subtitleLang, idx) => (
                                     <option key={`${idx}-${subtitleLang}`} value={subtitleLang}>
                                         {subtitleLang}
                                     </option>

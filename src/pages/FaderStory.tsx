@@ -7,6 +7,7 @@ import AssetUi from '../components/AssetUI/AssetUi';
 import PanelsSlideOut from '../components/AssetUI/PanelsSlideOut';
 import OptionsPanel from '../components/AssetUI/OptionsPanel';
 import ViewSettingsPanel from '../components/AssetUI/ViewSettingsPanel';
+import Nav from '../components/Nav';
 
 export type FaderStoryEditorViewerPropsType = {
     storyId: string | null;
@@ -114,7 +115,6 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
     /* For receiving updates to subtitle Track cues: */
     const activeSubtitle = useZustand((state) => state.fader.activeSubtitle);
 
-
     if (!storyId) {
         return <div className='text-slate-300'>No Story id provided!</div>;
     } else if (!faderStory) {
@@ -149,86 +149,94 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
     } else if (viewMode && !play) {
         /* Not clicked on play yet: */
         return (
-            <div className='relative h-full'>
-                <div className='absolute top-0 z-10 mx-auto flex h-full w-full flex-col items-center justify-center bg-black/75'>
-                    <div className='rounded-full bg-white p-4'>
-                        <div
-                            className='cursor-pointer rounded-full bg-blue-400 p-6 text-white transition-colors hover:bg-blue-200 hover:text-blue-800'
-                            onClick={() => {
-                                setPlay(true);
+            <>
+                <div className='relative h-full'>
+                    <div className='absolute top-0 z-10 mx-auto flex h-full w-full flex-col items-center justify-center bg-black/75'>
+                        <div className='rounded-full bg-white p-4'>
+                            <div
+                                className='cursor-pointer rounded-full bg-blue-400 p-6 text-white transition-colors hover:bg-blue-200 hover:text-blue-800'
+                                onClick={() => {
+                                    setPlay(true);
 
-                                /* Set an id to start the Anim loop */
-                                orderedArrayOfScenes.length &&
-                                    storeSetCurrentSceneId(orderedArrayOfScenes[currentPlaceInSceneOrderRef.current].id);
-                            }}
-                        >
-                            Play
+                                    /* Set an id to start the Anim loop */
+                                    orderedArrayOfScenes.length &&
+                                        storeSetCurrentSceneId(orderedArrayOfScenes[currentPlaceInSceneOrderRef.current].id);
+                                }}
+                            >
+                                Play
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {faderStory.preview_image && (
-                    <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
-                        <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
-                    </div>
-                )}
-            </div>
+                    {faderStory.preview_image && (
+                        <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
+                            <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
+                        </div>
+                    )}
+                </div>
+            </>
         );
     } else {
         return (
-            <div className='relative h-full w-full flex-1 bg-slate-800'>
-                {faderScenes[currentSceneId] ? (
-                    <div ref={faderThreeCanvasParentRef} className='h-full w-full'>
-                        <FaderThreeCanvas scene={faderScenes[currentSceneId]} viewMode={viewMode} debug={debug} />
-                    </div>
-                ) : (
-                    <>
-                        {faderStory.preview_image && (
-                            <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
-                                <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
-                            </div>
-                        )}
-                    </>
-                )}
+            <>
+                {!viewMode && <Nav storyId={storyId} />}
 
-                {/* Overlays (Scene picker, Scene name etc) : */}
-                <div className='pointer-events-none' /* << to enable 'clicking through' to THREE canvas */>
-                    {/* Leva Gui: */}
-                    <ViewSettingsPanel />
-
-                    {!viewMode && faderScenes[currentSceneId] && (
+                <div className='relative h-full w-full flex-1 bg-slate-800'>
+                    {faderScenes[currentSceneId] ? (
+                        <div ref={faderThreeCanvasParentRef} className='h-full w-full'>
+                            <FaderThreeCanvas scene={faderScenes[currentSceneId]} viewMode={viewMode} debug={debug} />
+                        </div>
+                    ) : (
                         <>
-                            {openPanel == '' && <PanelsSlideOut setOpenPanel={setOpenPanel} position={assetPanelParentRect} />}
-                            {openPanel == 'assets' && <AssetUi setOpenPanel={setOpenPanel} currentScene={faderScenes[currentSceneId]} />}
-                            {openPanel == 'options' && (
-                                <OptionsPanel setOpenPanel={setOpenPanel} currentScene={faderScenes[currentSceneId]} />
+                            {faderStory.preview_image && (
+                                <div className='flex h-full w-full justify-center p-6 drop-shadow-2xl'>
+                                    <img className='h-[90%] rounded-lg object-scale-down' src={faderStory.preview_image} />
+                                </div>
                             )}
                         </>
                     )}
 
-                    {/* Other Control elements:  */}
-                    <div className='absolute top-0 z-30 flex h-full w-full flex-col items-center justify-between p-2'>
-                        {/* Story/User: */}
-                        <div className='w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
-                            <b>{faderStory.name}</b> by <i>{faderStory.user_display_name}</i>
-                        </div>
+                    {/* Overlays (Scene picker, Scene name etc) : */}
+                    <div className='pointer-events-none' /* << to enable 'clicking through' to THREE canvas */>
+                        {/* Leva Gui: */}
+                        <ViewSettingsPanel />
 
-                        {/* Subtitles:  */}
-                        <div className='mb-6 mt-auto whitespace-pre-wrap text-center text-5xl text-gray-100 drop-shadow-[0_0.1rem_0.1rem_rgba(0,0,0,0.8)]'>
-                            {activeSubtitle}
-                        </div>
+                        {!viewMode && faderScenes[currentSceneId] && (
+                            <>
+                                {openPanel == '' && <PanelsSlideOut setOpenPanel={setOpenPanel} position={assetPanelParentRect} />}
+                                {openPanel == 'assets' && (
+                                    <AssetUi setOpenPanel={setOpenPanel} currentScene={faderScenes[currentSceneId]} />
+                                )}
+                                {openPanel == 'options' && (
+                                    <OptionsPanel setOpenPanel={setOpenPanel} currentScene={faderScenes[currentSceneId]} />
+                                )}
+                            </>
+                        )}
 
-                        {/* Scene picking: */}
-                        <ScenePicker
-                            ref={scenePickerViewModeProgressRef}
-                            storyData={faderStory.data}
-                            faderScenes={faderScenes}
-                            viewMode={viewMode}
-                            className='flex w-2/3 max-w-fit content-center justify-between justify-self-end rounded-md bg-slate-500 bg-opacity-75 p-1 text-slate-200 drop-shadow-2xl'
-                        />
+                        {/* Other Control elements:  */}
+                        <div className='absolute top-0 z-30 flex h-full w-full flex-col items-center justify-between p-2'>
+                            {/* Story/User: */}
+                            <div className='w-1/5 rounded-md bg-slate-500 bg-opacity-75 px-2 py-1 text-center text-slate-200 drop-shadow-2xl'>
+                                <b>{faderStory.name}</b> by <i>{faderStory.user_display_name}</i>
+                            </div>
+
+                            {/* Subtitles:  */}
+                            <div className='mb-6 mt-auto whitespace-pre-wrap text-center text-5xl text-gray-100 drop-shadow-[0_0.1rem_0.1rem_rgba(0,0,0,0.8)]'>
+                                {activeSubtitle}
+                            </div>
+
+                            {/* Scene picking: */}
+                            <ScenePicker
+                                ref={scenePickerViewModeProgressRef}
+                                storyData={faderStory.data}
+                                faderScenes={faderScenes}
+                                viewMode={viewMode}
+                                className='flex w-2/3 max-w-fit content-center justify-between justify-self-end rounded-md bg-slate-500 bg-opacity-75 p-1 text-slate-200 drop-shadow-2xl'
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 };

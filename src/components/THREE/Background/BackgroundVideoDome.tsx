@@ -21,20 +21,21 @@ const BackgroundVideoDome = ({
         return <></>;
     }
 
-    const viewModeSettings = useZustand((state) => state.siteData.viewModeSettings);
-    const storeSetViewModeSettings = useZustand((state) => state.methods.storeSetViewModeSettings);
+    const videoSettings = useZustand((state) => state.siteData.videoSettings);
+    const storeSetvideoSettings = useZustand((state) => state.methods.storeSetvideoSettings);
     const storeSetActiveSubtitle = useZustand((state) => state.methods.storeSetActiveSubtitle);
 
     const [vttSubs, setVttSubs] = useState<WebVTTSubsType[]>();
 
     useEffect(() => {
         if (viewMode) {
-            api_ListPublicAssetSubtitles(projectId, backendVideoAsset.id)
+            // BUG the following api call does not return correct subtitles if ded with backendVideoAsset.id, still requires a call with .asset_id (as opposed to ListAssetSubtitles)
+            api_ListPublicAssetSubtitles(projectId, backendVideoAsset.asset_id)
                 .then((srtSubtitles) => {
-                    if (srtSubtitles) {
+                    if (srtSubtitles && srtSubtitles.length) {
                         fetchSrtAndConvertToVttBlob(srtSubtitles)
                             .then((result) => {
-                                result && !vttSubs && setVttSubs(result);
+                                result && setVttSubs(result);
                             })
                             .catch((e) => handleErr(e));
                     }
@@ -45,10 +46,10 @@ const BackgroundVideoDome = ({
         } else {
             api_ListAssetSubtitles(backendVideoAsset.id)
                 .then((srtSubtitles) => {
-                    if (srtSubtitles) {
+                    if (srtSubtitles && srtSubtitles.length) {
                         fetchSrtAndConvertToVttBlob(srtSubtitles)
                             .then((result) => {
-                                result && !vttSubs && setVttSubs(result);
+                                result && setVttSubs(result);
                             })
                             .catch((e) => handleErr(e));
                     }
@@ -63,18 +64,21 @@ const BackgroundVideoDome = ({
 
         /* Remove <video> element (or rather, it's parent) on unMount */
         return () => {
-            videoElementParent.removeChild(videoElement);
+            (videoElementParent && videoElement) && videoElementParent.removeChild(videoElement);
             storeSetActiveSubtitle(undefined);
         };
-    }, []);
+    }, [backendVideoAsset.id]);
 
     const videoElementRef = useRef<HTMLVideoElement | null>(null);
     const [subLanguages, setSubLanguages] = useState<string[]>([]);
 
     const [videoElement, videoElementParent] = useMemo(() => {
-        if (!videoElementRef.current) {
+        if (!videoElementRef.current || videoElementRef.current.id !== backendVideoAsset.id) {
+            setVttSubs(undefined)
+            setSubLanguages([])
+
             const videoElement = document.createElement('video');
-            videoElement.id = 'BackgroundVideoDome Video Element';
+            videoElement.id = backendVideoAsset.id;
             videoElement.loop = true; // TODO control this somewhere
             videoElement.append('Your browser does not support the video tag.');
 
@@ -89,8 +93,10 @@ const BackgroundVideoDome = ({
             hls.loadSource(backendVideoAsset.static_url);
             hls.attachMedia(videoElement);
 
+            
             videoElementRef.current = videoElement;
             videoElementRef.current.play().catch((err) => handleErr(err));
+
         }
 
         if (vttSubs) {
@@ -128,14 +134,14 @@ const BackgroundVideoDome = ({
     }, [backendVideoAsset, vttSubs]);
 
     useEffect(() => {
-        storeSetViewModeSettings({ subtitleLanguagesAvailable: subLanguages });
+        storeSetvideoSettings({ subtitleLanguagesAvailable: subLanguages });
     }, [subLanguages]);
 
     useEffect(() => {
         if (videoElementRef.current && vttSubs) {
             /* Set first trackElement as active: */
-            if (!viewModeSettings.subtitleLanguage && viewModeSettings.subtitleLanguagesAvailable.length > 0) {
-                storeSetViewModeSettings({
+            if (!videoSettings.subtitleLanguage && videoSettings.subtitleLanguagesAvailable.length > 0) {
+                storeSetvideoSettings({
                     subtitleLanguage: videoElementRef.current.textTracks[0].language,
                 });
             }
@@ -150,13 +156,13 @@ const BackgroundVideoDome = ({
                     }
                 }
 
-                if (viewModeSettings.subtitles === false) {
+                if (videoSettings.subtitles === false) {
                     storeSetActiveSubtitle(null);
                     child.mode = 'disabled';
                     matchedChildElement!.default = false;
                 } else {
-                    if (viewModeSettings.subtitleLanguage) {
-                        if (child.language.includes(viewModeSettings.subtitleLanguage)) {
+                    if (videoSettings.subtitleLanguage) {
+                        if (child.language.includes(videoSettings.subtitleLanguage)) {
                             child.mode = 'showing';
                             matchedChildElement!.default = true;
                         } else {
@@ -167,7 +173,7 @@ const BackgroundVideoDome = ({
                 }
             }
         }
-    }, [vttSubs, viewModeSettings]);
+    }, [vttSubs, videoElement, videoSettings]);
 
     return (
         <>

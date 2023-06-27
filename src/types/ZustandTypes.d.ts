@@ -3,7 +3,8 @@ import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderSceneAssetType,
 
 export interface ZustandState {
     siteData: {
-        viewModeSettings: {
+        videoSettings: {
+            isPlaying: boolean;
             subtitles: boolean;
             subtitleLanguagesAvailable: string[];
             subtitleLanguage: string;
@@ -25,7 +26,7 @@ export interface ZustandState {
         storeDeleteFaderStoryAsset: (storyAsset: FaderSceneAssetType, sceneId: FaderSceneType['id']) => void;
         storeAddLevaPanel: (levaPanel: LevaPanelOptions, replace?: boolean) => void;
         storeSetFaderLevaOptionsStore: (optionsStore: StoreType) => void;
-        storeSetViewModeSettings: (viewModeSettings: Partial<ZustandState['siteData']['viewModeSettings']>) => void;
+        storeSetvideoSettings: (videoSettings: Partial<ZustandState['siteData']['videoSettings']>) => void;
         storeSetActiveSubtitle: (subtitleCue: string | null | undefined) => void;
     };
     fader: {

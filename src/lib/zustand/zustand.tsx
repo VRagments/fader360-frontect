@@ -145,13 +145,13 @@ const useZustand = create<ZustandState>()(
                             'storeSetFaderLevaOptionsStore'
                         );
                     },
-                    storeSetViewModeSettings: (viewModeSettings) => {
+                    storeSetvideoSettings: (videoSettings) => {
                         set(
                             (draftState) => {
-                                draftState.siteData.viewModeSettings = { ...draftState.siteData.viewModeSettings, ...viewModeSettings };
+                                draftState.siteData.videoSettings = { ...draftState.siteData.videoSettings, ...videoSettings };
                             },
                             false,
-                            'storeSetViewModeSettings'
+                            'storeSetvideoSettings'
                         );
                     },
                     storeSetActiveSubtitle: (subtitleCue) => {
@@ -165,7 +165,8 @@ const useZustand = create<ZustandState>()(
                     },
                 },
                 siteData: {
-                    viewModeSettings: {
+                    videoSettings: {
+                        isPlaying: true,
                         subtitles: true,
                         subtitleLanguagesAvailable: [],
                         subtitleLanguage: '',

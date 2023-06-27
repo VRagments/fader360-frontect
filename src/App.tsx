@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
-import Nav from './components/Nav';
 import { useEffect, useState } from 'react';
 import { FaderStoryType } from './types/FaderTypes';
 import useZustand from './lib/zustand/zustand';
@@ -12,8 +11,6 @@ function App() {
 
     return (
         <div className='flex h-screen w-screen flex-col'>
-            <Nav storyId={storyId} />
-
             <BrowserRouter basename={process.env.PUBLIC_URL}>
                 <GetSearchParams setStoryId={setStoryId} setDebug={setDebug} />
                 <Routes>
