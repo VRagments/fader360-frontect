@@ -1,6 +1,7 @@
 import Hls from 'hls.js';
 import { useEffect, useRef, useState } from 'react';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
+import { handleErr } from '../../../lib/methods/handleErr';
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 
@@ -19,10 +20,6 @@ const Audios = (props: AudiosProps) => {
 
                 if (audioAsset) {
                     const audioBackendAsset = storyAudioBackendAssets[audioAsset.backendId];
-
-                    if (audioBackendAsset.attributes.duration > parseFloat(scene.duration)) {
-                        //
-                    }
 
                     /* Update the scene's duration to the longest Video asset's duration: */
                     if (audioBackendAsset.attributes.duration > parseFloat(scene.duration)) {
@@ -53,7 +50,7 @@ const Audios = (props: AudiosProps) => {
 export default Audios;
 
 export const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) => {
-    const hls = useRef({ hls: new Hls(), audioSource: backendAsset?.static_url });
+    const hls = useRef({ hls: new Hls({debug: false}), audioSource: backendAsset?.static_url });
     const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
     useEffect(() => {
@@ -63,8 +60,7 @@ export const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) =
             hls.current.hls.attachMedia(audioRef);
 
             hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
-                // eslint-disable-next-line no-console
-                console.error(`${event}, ${data}`);
+                handleErr(event, data);
             });
         }
     }, [audioRef]);

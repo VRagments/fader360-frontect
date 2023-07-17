@@ -86,7 +86,7 @@ export const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementProps)
     }, [asset]);
 
     const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
-    const hls = useRef({ hls: new Hls(), videoSource: backendAsset.static_url });
+    const hls = useRef({ hls: new Hls({debug: false}), videoSource: backendAsset.static_url });
 
     useEffect(() => {
         if (videoRef) {
