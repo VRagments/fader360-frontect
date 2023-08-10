@@ -69,7 +69,6 @@ export const defaultProjectData: FaderStoryDataType = {
         showSceneInfo: false,
         userSelectedThumbnail: false,
     },
-    uploadedAssetIds: [],
     version: 0,
 };
 
@@ -89,7 +88,7 @@ export const defaultAssetProperties: FaderSceneAssetType['properties'] = {
 };
 
 export const defaultAssetData: FaderSceneAssetType['data'] = {
-    autoPlay: true,
+    autoPlay: false,
     backgroundColor: '#222222' /* as above ^ */,
     backgroundOn: true,
     backgroundOpacity: 0.75,

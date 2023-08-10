@@ -124,6 +124,13 @@ export const AddAssetPanel = ({ currentScene, addAssetPanelState }: AddAssetPane
                 } else {
                     sortedBackendAssetsByType = getSortedBackendAssetsByType(backendAssets)[type as FaderAssetType];
                 }
+
+                /* Filter non-ready Assets, such as placeholders: */
+                Object.values(sortedBackendAssetsByType).forEach((bckAss) => {
+                    if (bckAss.status !== 'ready') {
+                        delete sortedBackendAssetsByType[bckAss.id];
+                    }
+                });
                 namedRecord = { ...namedRecord, ...generateRecordOfNamedBackendAssetIds(sortedBackendAssetsByType) };
 
                 return namedRecord;

@@ -30,8 +30,6 @@ export interface FaderStoryDataType {
         showSceneInfo: boolean;
         userSelectedThumbnail: boolean;
     };
-    /** Backend Id's */
-    uploadedAssetIds: string[];
     version: number;
 }
 

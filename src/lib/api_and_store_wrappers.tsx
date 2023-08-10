@@ -24,13 +24,21 @@ const {
     storeUpdateFaderStoryAsset,
     storeUpdateFaderScene,
     storeSetFaderStory,
+    storeSetFaderScenes,
+    storeSetFaderStoryBackendAssets,
 } = useZustand.getState().methods;
 
 /** Requests a Project/FaderStory & its Scenes & associated BackendAssets, fills .data fields if need be, sends to Zustand */
 export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: string) => {
-    const { storeSetFaderStory, storeSetFaderScenes, storeSetFaderStoryBackendAssets } = useZustand.getState().methods;
-
     /*  1.
+        Get a project's backend assets.
+        Send to store (fader.faderStoryBackendAssets).
+    */
+    const projectBackendAssets = (await api_ListBackendAssetsAssociatedWithProject(sceneIdParam)) as FaderBackendAsset[];
+    const backendAssets = arrayToRecordOfIds(projectBackendAssets);
+    storeSetFaderStoryBackendAssets(backendAssets);
+
+    /*  2.
         Get Project
         If .data field is empty/incomplete, add default properties.
     */
@@ -51,7 +59,7 @@ export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: stri
         firstProject.data = syncProjectData(firstProject.data);
     }
 
-    /*  2.
+    /*  3.
         Get FaderScene's associated with FaderStory.
         If their .data fields are null (so an empty scene), add default data fields. 
         Then send to store (fader.faderScenes) .
@@ -86,6 +94,26 @@ export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: stri
             if (!firstProject.data.sceneOrder.includes(projectScene.id)) {
                 firstProject.data.sceneOrder.push(projectScene.id);
             }
+
+            /* Check if a backendAsset has been removed from Project and 'cleanse' Scenes: */
+            projectScene.data.assetIds.forEach((assetId) => {
+                const scnDta = projectScene.data;
+                if (!(scnDta.assets[assetId].backendId in backendAssets)) {
+                    delete scnDta.assets[assetId];
+                    scnDta.assetIds = scnDta.assetIds.filter((assId) => assetId !== assId);
+
+                    for (const key in scnDta.assetOrderByGroup) {
+                        if (scnDta.assetOrderByGroup[key as FaderAssetGroupType].includes(assetId)) {
+                            scnDta.assetOrderByGroup[key as FaderAssetGroupType].splice(
+                                scnDta.assetOrderByGroup[key as FaderAssetGroupType].findIndex((id) => assetId === id),
+                                1
+                            );
+
+                            api_UpdateScene(projectScene).catch((e: string) => new Error(e));
+                        }
+                    }
+                }
+            });
         });
 
         const scenes = arrayToRecordOfIds(allProjectScenes);
@@ -95,25 +123,6 @@ export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: stri
     /* Sync incoming allProjectScenes with existing sceneOrder: */
     const syncedSceneOrder = firstProject.data.sceneOrder.filter((sceneId) => allProjectScenes.some((scene) => scene.id == sceneId));
     firstProject.data.sceneOrder = syncedSceneOrder;
-
-    /*  3.
-        Get a project's backend assets.
-        Add to project .data.uploadedAssetIds
-        Send to store (fader.faderStoryBackendAssets).
-    */
-    const projectBackendAssets = (await api_ListBackendAssetsAssociatedWithProject(sceneIdParam)) as FaderBackendAsset[];
-    const backendAssets = arrayToRecordOfIds(projectBackendAssets);
-    storeSetFaderStoryBackendAssets(backendAssets);
-
-    if (projectBackendAssets.length > 0) {
-        // firstProject.data.uploadedAssetIds = removeDuplicatesInArray(firstProject.data.uploadedAssetIds) as string[];
-
-        projectBackendAssets.forEach((backendAsset) => {
-            if (!firstProject.data.uploadedAssetIds.includes(backendAsset.id)) {
-                firstProject.data.uploadedAssetIds.push(backendAsset.id);
-            }
-        });
-    }
 
     /* 4. Send ready Project to store */
     storeSetFaderStory(firstProject);
