@@ -59,9 +59,10 @@ export const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) =
             hls.current.hls.loadSource(hls.current.audioSource as string);
             hls.current.hls.attachMedia(audioRef);
 
-            hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
-                handleErr(event, data);
-            });
+            // WARN commenting out error-event-catching for now since it leads to "RangeError: Maximum call stack size exceeded at 'Hls.trigger'" errors. Should be fixed in an upcoming HLS update, see https://github.com/video-dev/hls.js/pull/5549
+            // hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
+            //     handleErr(event, data);
+            // });
         }
     }, [audioRef]);
 

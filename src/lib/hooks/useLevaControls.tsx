@@ -379,7 +379,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
         ),
     };
 
-    return useControls(() => defaultControls, { store }, [assetProperties]);
+    return useControls(() => defaultControls, { store }, [assetProperties, setAssetProperties, assetData, setAssetData]);
 };
 
 const backgroundSphereRadius = backgroundSphereGeometryArgs[0];

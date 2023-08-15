@@ -98,18 +98,21 @@ export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: stri
             /* Check if a backendAsset has been removed from Project and 'cleanse' Scenes: */
             projectScene.data.assetIds.forEach((assetId) => {
                 const scnDta = projectScene.data;
+
                 if (!(scnDta.assets[assetId].backendId in backendAssets)) {
-                    delete scnDta.assets[assetId];
-                    scnDta.assetIds = scnDta.assetIds.filter((assId) => assetId !== assId);
+                    if (scnDta.assets[assetId].group !== 'TextCard' && scnDta.assets[assetId].group !== 'SceneLink') {
+                        delete scnDta.assets[assetId];
+                        scnDta.assetIds = scnDta.assetIds.filter((assId) => assetId !== assId);
 
-                    for (const key in scnDta.assetOrderByGroup) {
-                        if (scnDta.assetOrderByGroup[key as FaderAssetGroupType].includes(assetId)) {
-                            scnDta.assetOrderByGroup[key as FaderAssetGroupType].splice(
-                                scnDta.assetOrderByGroup[key as FaderAssetGroupType].findIndex((id) => assetId === id),
-                                1
-                            );
+                        for (const key in scnDta.assetOrderByGroup) {
+                            if (scnDta.assetOrderByGroup[key as FaderAssetGroupType].includes(assetId)) {
+                                scnDta.assetOrderByGroup[key as FaderAssetGroupType].splice(
+                                    scnDta.assetOrderByGroup[key as FaderAssetGroupType].findIndex((id) => assetId === id),
+                                    1
+                                );
 
-                            api_UpdateScene(projectScene).catch((e: string) => new Error(e));
+                                api_UpdateScene(projectScene).catch((e: string) => new Error(e));
+                            }
                         }
                     }
                 }
