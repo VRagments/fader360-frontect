@@ -8,6 +8,8 @@ import PanelsSlideOut from '../components/AssetUI/PanelsSlideOut';
 import OptionsPanel from '../components/AssetUI/OptionsPanel';
 import ViewSettingsPanel from '../components/AssetUI/ViewSettingsPanel';
 import Nav from '../components/Nav';
+import { api_ShowProject } from '../lib/axios';
+import { FaderStoryType } from '../types/FaderTypes';
 
 export type FaderStoryEditorViewerPropsType = {
     storyId: string | null;
@@ -22,16 +24,27 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
 
     const viewMode = mode === 'view' ? true : false;
 
+    /** To find out if we're logged in and able to access this story (so, should be owner or collaborator), make a private api call. If result, use private calls from here on, enabling Viewmode for non-discoverable Stories */
+    const [userNameRemote, setUserNameRemote] = useState<string | null>(null);
+    storyId &&
+        api_ShowProject(storyId, true)
+            .then((res) => {
+                res && setUserNameRemote((res as FaderStoryType).author as string);
+            })
+            .catch(() => {
+                setUserNameRemote(null);
+            });
+
     useEffect(() => {
         /* A storyid is provided via query param, and there is none set yet, or the current faderStory is stale: */
-        if (storyId && (!faderStory || storyId !== faderStory.id)) {
-            if (viewMode) {
+        if (storyId && (!faderStory || storyId !== faderStory.id) && userNameRemote !== undefined) {
+            if (viewMode && !userNameRemote) {
                 wrappers_ViewerProjectSyncToStore(storyId).catch((err: string) => new Error(err));
             } else {
                 wrappers_FirstProjectInitAndSendToStore(storyId).catch((err: string) => new Error(err));
             }
         }
-    }, [storyId]);
+    }, [storyId, userNameRemote]);
 
     /* Sets options side panel ('' opens the side panel), set to open on scene-switch */
     const [openPanel, setOpenPanel] = useState<'' | 'assets' | 'options'>('');

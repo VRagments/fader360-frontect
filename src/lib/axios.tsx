@@ -8,13 +8,18 @@ const api = axios.create();
 const apiBaseUrl = buildConfig.api.baseUrl;
 
 /** GETs a Project/FaderStory via id */
-export const api_ShowProject = async (project_id: string) => {
+export const api_ShowProject = async (project_id: string, loginCheck = false) => {
     return await api
         .get(`${apiBaseUrl}/projects/${project_id}`)
         .then((result: AxiosResponse<FaderStoryType>) => {
             return result.data;
         })
-        .catch((err) => handleAxiosError(err, 'GET api_ShowProject'));
+        .catch((err: AxiosError) => {
+            !loginCheck && handleAxiosError(err, 'GET api_ShowProject');
+            if (err.status === 422) {
+                return err.status;
+            }
+        });
 };
 
 /** GET list of all scenes in an Project/FaderStory */
