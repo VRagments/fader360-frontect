@@ -1,4 +1,5 @@
 import { LevaPanel } from 'leva';
+import { useMemo } from 'react';
 import useZustand from '../../lib/zustand/zustand';
 import { LevaThemeType } from '../../style/levaTheme';
 
@@ -14,15 +15,18 @@ const SingleAssetPropertiesPanel = ({ selectedAssetState, theme, position }: Sin
     const [selectedAssetId] = selectedAssetState;
     const faderLevaPanels = useZustand((state) => state.fader.faderLevaPanels);
 
-    const [activeLevaPanelOptions] = faderLevaPanels.filter((levaPanel) => levaPanel.id === selectedAssetId);
+    const activeLevaPanelOptionsMemo = useMemo(() => {
+        const filteredLevaPanel = faderLevaPanels.filter((levaPanel) => levaPanel.id === selectedAssetId)[0];
+        return filteredLevaPanel;
+    }, [selectedAssetId]);
 
-    return activeLevaPanelOptions ? (
+    return activeLevaPanelOptionsMemo ? (
         <LevaPanel
-            key={`${activeLevaPanelOptions.id}`}
-            store={activeLevaPanelOptions.store}
+            key={`${activeLevaPanelOptionsMemo.id}`}
+            store={activeLevaPanelOptionsMemo.store}
             theme={theme}
             titleBar={{
-                title: `${activeLevaPanelOptions.group} - ${activeLevaPanelOptions.id}`,
+                title: `${activeLevaPanelOptionsMemo.group} - ${activeLevaPanelOptionsMemo.id}`,
                 drag: false,
                 position: {
                     x: position.x,

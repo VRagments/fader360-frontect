@@ -406,7 +406,11 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
                     disabled: Object.keys(replaceAssetCb(asset.type)).length > 1 ? false : true,
                 },
             },
-            { order: 1, collapsed: backendAssets[asset.backendId].status !== 'ready' ? false : true }
+            {
+                order: 1,
+                collapsed: backendAssets[asset.backendId] && backendAssets[asset.backendId].status !== 'ready' ? false : true,
+                render: () => asset.group !== 'TextCard' && asset.group !== 'SceneLink',
+            }
         ),
 
         'Display': folder(displayControls, { order: 2, collapsed: false }),

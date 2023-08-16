@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import Hls from 'hls.js';
 import { useMemo, useEffect, useState, useRef } from 'react';
 import { BackSide } from 'three';
@@ -5,16 +6,14 @@ import { api_ListAssetSubtitles, api_ListPublicAssetSubtitles } from '../../../l
 import { backgroundSphereGeometryArgs } from '../../../lib/defaults';
 import { handleErr } from '../../../lib/methods/handleErr';
 import useZustand from '../../../lib/zustand/zustand';
-import { FaderBackendAsset, FaderStoryType } from '../../../types/FaderTypes';
+import { FaderBackendAsset, FaderStoryType, FaderVideoSubtitlesType } from '../../../types/FaderTypes';
 import { fetchSrtAndConvertToVttBlob, WebVTTSubsType } from '../AssetConsumption/Videos2d';
 
 const BackgroundVideoDome = ({
     backendVideoAsset,
-    viewMode,
     projectId,
 }: {
     backendVideoAsset: FaderBackendAsset;
-    viewMode: boolean;
     projectId: FaderStoryType['id'];
 }) => {
     if (!Hls.isSupported()) {
@@ -28,54 +27,51 @@ const BackgroundVideoDome = ({
     const [vttSubs, setVttSubs] = useState<WebVTTSubsType[]>();
 
     useEffect(() => {
-        if (viewMode) {
-            // BUG the following api call does not return correct subtitles if ded with backendVideoAsset.id, still requires a call with .asset_id (as opposed to ListAssetSubtitles)
-            api_ListPublicAssetSubtitles(projectId, backendVideoAsset.asset_id)
-                .then((srtSubtitles) => {
-                    if (srtSubtitles && srtSubtitles.length) {
-                        fetchSrtAndConvertToVttBlob(srtSubtitles)
-                            .then((result) => {
-                                result && setVttSubs(result);
+        api_ListAssetSubtitles(backendVideoAsset.id)
+            .then((prvResult) => {
+                if (prvResult) {
+                    if ((prvResult as FaderVideoSubtitlesType[]).length) {
+                        fetchSrtAndConvertToVttBlob(prvResult as FaderVideoSubtitlesType[])
+                            .then((conversionRes) => {
+                                conversionRes && setVttSubs(conversionRes);
+                            })
+                            .catch((e) => handleErr(e));
+                    } else if ((prvResult as AxiosError).isAxiosError && (prvResult as AxiosError).response?.status === 422) {
+                        api_ListPublicAssetSubtitles(projectId, backendVideoAsset.id)
+                            .then((pubResult) => {
+                                if (pubResult) {
+                                    if ((pubResult as FaderVideoSubtitlesType[]).length) {
+                                        fetchSrtAndConvertToVttBlob(pubResult as FaderVideoSubtitlesType[])
+                                            .then((conversionRes) => {
+                                                conversionRes && setVttSubs(conversionRes);
+                                            })
+                                            .catch((e) => handleErr(e));
+                                    }
+                                }
                             })
                             .catch((e) => handleErr(e));
                     }
-                })
-                .catch((e) => {
-                    handleErr(e);
-                });
-        } else {
-            api_ListAssetSubtitles(backendVideoAsset.id)
-                .then((srtSubtitles) => {
-                    if (srtSubtitles && srtSubtitles.length) {
-                        fetchSrtAndConvertToVttBlob(srtSubtitles)
-                            .then((result) => {
-                                result && setVttSubs(result);
-                            })
-                            .catch((e) => handleErr(e));
-                    }
-                })
-                .catch((e) => {
-                    handleErr(e);
-                });
-        }
+                }
+            })
+            .catch((e) => handleErr(e));
 
         /* Setting to null at start, since ViewSettingsPanel checks for undefined in order to render/not render */
         storeSetActiveSubtitle(null);
 
         /* Remove <video> element (or rather, it's parent) on unMount */
         return () => {
-            (videoElementParent && videoElement) && videoElementParent.removeChild(videoElement);
+            videoElementParent && videoElement && videoElementParent.removeChild(videoElement);
             storeSetActiveSubtitle(undefined);
         };
-    }, [backendVideoAsset.id]);
+    }, [projectId, backendVideoAsset.id]);
 
     const videoElementRef = useRef<HTMLVideoElement | null>(null);
     const [subLanguages, setSubLanguages] = useState<string[]>([]);
 
     const [videoElement, videoElementParent] = useMemo(() => {
         if (!videoElementRef.current || videoElementRef.current.id !== backendVideoAsset.id) {
-            setVttSubs(undefined)
-            setSubLanguages([])
+            setVttSubs(undefined);
+            setSubLanguages([]);
 
             const videoElement = document.createElement('video');
             videoElement.id = backendVideoAsset.id;
@@ -93,10 +89,8 @@ const BackgroundVideoDome = ({
             hls.loadSource(backendVideoAsset.static_url);
             hls.attachMedia(videoElement);
 
-            
             videoElementRef.current = videoElement;
             videoElementRef.current.play().catch((err) => handleErr(err));
-
         }
 
         if (vttSubs) {

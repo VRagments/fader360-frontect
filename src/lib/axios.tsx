@@ -4,28 +4,22 @@ import { ApiListResponse } from '../types/ApiTypes';
 import { FaderBackendAsset, FaderSceneType, FaderStoryType, FaderVideoSubtitlesType } from '../types/FaderTypes';
 import buildConfig from '../buildConfig';
 
-const api = axios.create();
-const apiBaseUrl = buildConfig.api.baseUrl;
+export const api = axios.create({ baseURL: buildConfig.api.baseUrl });
 
 /** GETs a Project/FaderStory via id */
-export const api_ShowProject = async (project_id: string, loginCheck = false) => {
+export const api_ShowProject = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/projects/${project_id}`)
+        .get(`/projects/${project_id}`)
         .then((result: AxiosResponse<FaderStoryType>) => {
             return result.data;
         })
-        .catch((err: AxiosError) => {
-            !loginCheck && handleAxiosError(err, 'GET api_ShowProject');
-            if (err.status === 422) {
-                return err.status;
-            }
-        });
+        .catch((err: AxiosError) => handleAxiosError(err, 'GET api_ShowProject'));
 };
 
 /** GET list of all scenes in an Project/FaderStory */
 export const api_ListProjectScenes = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/projects/${project_id}/project_scenes`)
+        .get(`/projects/${project_id}/project_scenes`)
         .then((result: AxiosResponse<ApiListResponse<FaderSceneType>>) => {
             return result.data.objects;
         })
@@ -35,7 +29,7 @@ export const api_ListProjectScenes = async (project_id: string) => {
 /** GETs all FaderBackendAssets linked to a Project/FaderStory */
 export const api_ListBackendAssetsAssociatedWithProject = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/projects/${project_id}/assets`)
+        .get(`/projects/${project_id}/assets`)
         .then((result: AxiosResponse<ApiListResponse<FaderBackendAsset>>) => {
             return result.data.objects;
         })
@@ -46,17 +40,17 @@ export const api_ListBackendAssetsAssociatedWithProject = async (project_id: str
 
 export const api_ListAssetSubtitles = async (assetId: string) => {
     return await api
-        .get(`${apiBaseUrl}/assets/${assetId}/asset_subtitles`)
+        .get(`/assets/${assetId}/asset_subtitles`)
         .then((result: AxiosResponse<ApiListResponse<FaderVideoSubtitlesType>>) => {
             return result.data.objects;
         })
-        .catch((err) => handleAxiosError(err, 'GET api_ListAssetSubtitles'));
+        .catch((err: AxiosError) => err);
 };
 
 /** PUTs/updates FaderProject  */
 export const api_UpdateProject = async (project_id: string, project: FaderStoryType) => {
     return await api
-        .put(`${apiBaseUrl}/projects/${project_id}`, project)
+        .put(`/projects/${project_id}`, project)
         .then((result: AxiosResponse<FaderStoryType>) => {
             return result.data;
         })
@@ -66,7 +60,7 @@ export const api_UpdateProject = async (project_id: string, project: FaderStoryT
 /** PUTs new FaderScene to Api  */
 export const api_UpdateScene = async (scene: FaderSceneType) => {
     return await api
-        .put(`${apiBaseUrl}/projects/${scene.project_id}/project_scenes/${scene.id}`, scene)
+        .put(`/projects/${scene.project_id}/project_scenes/${scene.id}`, scene)
         .then((result: AxiosResponse<FaderSceneType>) => {
             return result.data;
         })
@@ -80,7 +74,7 @@ export const api_UpdateScene = async (scene: FaderSceneType) => {
 /** GETs a Public Project/FaderStory via id */
 export const api_ShowPublicProject = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/public/projects/${project_id}`)
+        .get(`/public/projects/${project_id}`)
         .then((result: AxiosResponse<FaderStoryType>) => {
             return result.data;
         })
@@ -90,7 +84,7 @@ export const api_ShowPublicProject = async (project_id: string) => {
 /** GETs BackendAssets assigned to public Project/FaderStory */
 export const api_ListBackendAssetsAssociatedWithPublicProject = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/public/projects/${project_id}/assets`)
+        .get(`/public/projects/${project_id}/assets`)
         .then((result: AxiosResponse<ApiListResponse<FaderBackendAsset>>) => {
             return result.data.objects;
         })
@@ -99,17 +93,17 @@ export const api_ListBackendAssetsAssociatedWithPublicProject = async (project_i
 
 export const api_ListPublicAssetSubtitles = async (projectId: string, assetId: string) => {
     return await api
-        .get(`${apiBaseUrl}/public/projects/${projectId}/assets/${assetId}/asset_subtitles`)
+        .get(`/public/projects/${projectId}/assets/${assetId}/asset_subtitles`)
         .then((result: AxiosResponse<ApiListResponse<FaderVideoSubtitlesType>>) => {
             return result.data.objects;
         })
-        .catch((err) => handleAxiosError(err, 'GET api_ListPublicAssetSubtitles'));
+        .catch((err: AxiosError) => err);
 };
 
 /** GET list of all scenes in a public Project/FaderStory */
 export const api_ListPublicProjectScenes = async (project_id: string) => {
     return await api
-        .get(`${apiBaseUrl}/public/projects/${project_id}/project_scenes`)
+        .get(`/public/projects/${project_id}/project_scenes`)
         .then((result: AxiosResponse<ApiListResponse<FaderSceneType>>) => {
             return result.data.objects;
         })
@@ -124,5 +118,5 @@ export function handleAxiosError(error: unknown, caller?: string) {
     console.error(
         `Axios Error; MSG: ${(error as AxiosError).message}, CODE: ${(error as AxiosError).code}, ${caller && `CALLER: '${caller}')`}`
     );
-    return null;
+    return error;
 }

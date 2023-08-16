@@ -58,68 +58,72 @@ const AssetWrapper = (props: AssetWrapperProps) => {
     /* Memoize transform calculations, update on properties change */
     const convertedTRSMemoized = useMemo(() => convertTRSWrapper(assetProperties, cameraPos), [assetProperties, cameraPos]);
 
-    return (
-        <Html
-            /* 'className' and 'style' affect the otherwise empty direct parent div, 'wrapperClass' affects the root div used for transforms: */
-            key={asset.id}
-            position={convertedTRSMemoized.positionConverted}
-            rotation={convertedTRSMemoized.rotationConverted}
-            scale={convertedTRSMemoized.scaleConverted.multiplyScalar(1 / scaleFactor)} /* see scaleFactor, Line 15 */
-            transform
-            zIndexRange={[19, 0]}
-            occlude={false}
-            className={'group'}
-            style={{
-                transform: `scale3d(${scaleFactor}, ${scaleFactor}, ${scaleFactor})`, // see scaleFactor, Line 15
-            }}
-        >
-            <div
-                id={`userRoot Element of Html 'Panel': ${asset.group} (${asset.type}) - asset name: ${assetData.name} - asset id: ${
-                    asset.id
-                } ${backendAsset && ` - backendAsset id: ${backendAsset.id}`}`}
-                className={
-                    'box-content flex max-h-fit max-w-lg cursor-pointer select-none flex-col items-center justify-between overflow-hidden rounded-md p-2 text-center outline-none will-change-transform ' +
-                    additionalClassNames
-                }
-                onClick={(ev) => {
-                    onClickCallback(ev);
-                }}
+    if (!asset || (!backendAsset && asset.type !== 'TextCard')) {
+        return null;
+    } else {
+        return (
+            <Html
+                /* 'className' and 'style' affect the otherwise empty direct parent div, 'wrapperClass' affects the root div used for transforms: */
+                key={asset.id}
+                position={convertedTRSMemoized.positionConverted}
+                rotation={convertedTRSMemoized.rotationConverted}
+                scale={convertedTRSMemoized.scaleConverted.multiplyScalar(1 / scaleFactor)} /* see scaleFactor, Line 15 */
+                transform
+                zIndexRange={[19, 0]}
+                occlude={false}
+                className={'group'}
                 style={{
-                    color: assetData.textColor,
-                    backgroundColor: assetData.backgroundOn
-                        ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
-                        : 'transparent',
-                    boxShadow: `0px 0px 0px 0.15rem ${mergeHexAndOpacityValues(assetData.frameColor, assetData.frameOpacity)}`,
+                    transform: `scale3d(${scaleFactor}, ${scaleFactor}, ${scaleFactor})`, // see scaleFactor, Line 15
                 }}
             >
-                {assetData.headline && (
-                    <div
-                        id={`panel headline ${asset.id}`}
-                        className='bold mb-1 w-auto rounded p-1 px-2 text-lg'
-                        style={{
-                            backgroundColor: assetData.backgroundOn
-                                ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
-                                : 'transparent',
-                        }}
-                    >
-                        {assetData.headline}
-                    </div>
-                )}
+                <div
+                    id={`userRoot Element of Html 'Panel': ${asset.group} (${asset.type}) - asset name: ${assetData.name} - asset id: ${
+                        asset.id
+                    } ${backendAsset && ` - backendAsset id: ${backendAsset.id}`}`}
+                    className={
+                        'box-content flex max-h-fit max-w-lg cursor-pointer select-none flex-col items-center justify-between overflow-hidden rounded-md p-2 text-center outline-none will-change-transform ' +
+                        additionalClassNames
+                    }
+                    onClick={(ev) => {
+                        onClickCallback(ev);
+                    }}
+                    style={{
+                        color: assetData.textColor,
+                        backgroundColor: assetData.backgroundOn
+                            ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
+                            : 'transparent',
+                        boxShadow: `0px 0px 0px 0.15rem ${mergeHexAndOpacityValues(assetData.frameColor, assetData.frameOpacity)}`,
+                    }}
+                >
+                    {assetData.headline && (
+                        <div
+                            id={`panel headline ${asset.id}`}
+                            className='bold mb-1 w-auto rounded p-1 px-2 text-lg'
+                            style={{
+                                backgroundColor: assetData.backgroundOn
+                                    ? mergeHexAndOpacityValues(assetData.backgroundColor, assetData.backgroundOpacity)
+                                    : 'transparent',
+                            }}
+                        >
+                            {assetData.headline}
+                        </div>
+                    )}
 
-                {assetJsxElement({ asset, assetDataRef, backendAsset, viewMode })}
+                    {assetJsxElement({ asset, assetDataRef, backendAsset: backendAsset as FaderBackendAsset, viewMode })}
 
-                {assetData.body && (
-                    <div id={`panel body ${asset.id}`} className='whitespace-pre-wrap'>
-                        {assetData.body}
-                    </div>
-                )}
+                    {assetData.body && (
+                        <div id={`panel body ${asset.id}`} className='whitespace-pre-wrap'>
+                            {assetData.body}
+                        </div>
+                    )}
 
-                {!viewMode && (
-                    <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataState={assetDataState} />
-                )}
-            </div>
-        </Html>
-    );
+                    {!viewMode && (
+                        <EditMode scene={scene} asset={asset} assetPropertiesState={assetPropertiesState} assetDataState={assetDataState} />
+                    )}
+                </div>
+            </Html>
+        );
+    }
 };
 
 export default AssetWrapper;
@@ -192,8 +196,8 @@ const EditMode = (props: EditModePropsType) => {
 };
 
 export type AssetJsxElementProps = {
-    asset?: FaderSceneAssetType;
-    backendAsset?: FaderBackendAsset;
+    asset: FaderSceneAssetType;
+    backendAsset: FaderBackendAsset;
     assetDataRef?: React.MutableRefObject<FaderSceneAssetType['data']>;
     viewMode?: boolean;
 };

@@ -8,8 +8,9 @@ import PanelsSlideOut from '../components/AssetUI/PanelsSlideOut';
 import OptionsPanel from '../components/AssetUI/OptionsPanel';
 import ViewSettingsPanel from '../components/AssetUI/ViewSettingsPanel';
 import Nav from '../components/Nav';
-import { api_ShowProject } from '../lib/axios';
+import { api } from '../lib/axios';
 import { FaderStoryType } from '../types/FaderTypes';
+import { AxiosResponse } from 'axios';
 
 export type FaderStoryEditorViewerPropsType = {
     storyId: string | null;
@@ -24,24 +25,26 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
 
     const viewMode = mode === 'view' ? true : false;
 
-    /** To find out if we're logged in and able to access this story (so, should be owner or collaborator), make a private api call. If result, use private calls from here on, enabling Viewmode for non-discoverable Stories */
-    const [userNameRemote, setUserNameRemote] = useState<string | null>(null);
-    storyId &&
-        api_ShowProject(storyId, true)
-            .then((res) => {
-                res && setUserNameRemote((res as FaderStoryType).author as string);
-            })
-            .catch(() => {
-                setUserNameRemote(null);
-            });
-
+    /** To find out if we're logged in and able to access this story (so, should be owner or collaborator), make a private api call.
+     *  If result, use private calls from here on, enabling Viewmode for non-discoverable Stories */
+    const [userNameRemote, setUserNameRemote] = useState<string | null>();
     useEffect(() => {
-        /* A storyid is provided via query param, and there is none set yet, or the current faderStory is stale: */
-        if (storyId && (!faderStory || storyId !== faderStory.id) && userNameRemote !== undefined) {
-            if (viewMode && !userNameRemote) {
-                wrappers_ViewerProjectSyncToStore(storyId).catch((err: string) => new Error(err));
-            } else {
-                wrappers_FirstProjectInitAndSendToStore(storyId).catch((err: string) => new Error(err));
+        if (storyId) {
+            api.get(`/projects/${storyId}`)
+                .then((result: AxiosResponse<FaderStoryType>) => {
+                    setUserNameRemote(result.data.author as string);
+                })
+                .catch(() => {
+                    setUserNameRemote(null);
+                });
+
+            /* A storyid is provided via query param, and there is none set yet, or the current faderStory is stale: */
+            if ((!faderStory || storyId !== faderStory.id) && userNameRemote !== undefined) {
+                if (viewMode && !userNameRemote) {
+                    wrappers_ViewerProjectSyncToStore(storyId).catch((err: string) => new Error(err));
+                } else {
+                    wrappers_FirstProjectInitAndSendToStore(storyId).catch((err: string) => new Error(err));
+                }
             }
         }
     }, [storyId, userNameRemote]);
@@ -55,14 +58,14 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
     }, [currentSceneId]);
 
     /* Get Canvas dimensions on-screen to correctly position options side panel: */
-    const faderThreeCanvasParentRef = useRef<HTMLDivElement>(null);
+    const [canvasParentRef, setCanvasParentRef] = useState<HTMLDivElement | null>(null);
     const [assetPanelParentRect, setAssetPanelParentRect] = useState({ x: 0, y: 0 });
     useEffect(() => {
-        if (faderThreeCanvasParentRef.current) {
-            const elemRect = faderThreeCanvasParentRef.current.getBoundingClientRect();
+        if (canvasParentRef) {
+            const elemRect = canvasParentRef.getBoundingClientRect();
             setAssetPanelParentRect({ x: -elemRect.width - 10, y: elemRect.top - 10 }); // '10' is a hardcoded leva value
         }
-    }, [faderThreeCanvasParentRef.current]);
+    }, [canvasParentRef]);
 
     /* Code for stepping through FaderScene's in Viewmode: */
     const orderedArrayOfScenes = useMemo(() => {
@@ -196,7 +199,7 @@ const FaderStory = ({ storyId, mode, debug }: FaderStoryEditorViewerPropsType) =
 
                 <div className='relative h-full w-full flex-1 bg-slate-800'>
                     {faderScenes[currentSceneId] ? (
-                        <div ref={faderThreeCanvasParentRef} className='h-full w-full'>
+                        <div ref={setCanvasParentRef} className='h-full w-full'>
                             <FaderThreeCanvas scene={faderScenes[currentSceneId]} viewMode={viewMode} debug={debug} />
                         </div>
                     ) : (

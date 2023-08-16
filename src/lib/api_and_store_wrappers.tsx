@@ -97,17 +97,17 @@ export const wrappers_FirstProjectInitAndSendToStore = async (sceneIdParam: stri
 
             /* Check if a backendAsset has been removed from Project and 'cleanse' Scenes: */
             projectScene.data.assetIds.forEach((assetId) => {
-                const scnDta = projectScene.data;
+                const sceneData = projectScene.data;
 
-                if (!(scnDta.assets[assetId].backendId in backendAssets)) {
-                    if (scnDta.assets[assetId].group !== 'TextCard' && scnDta.assets[assetId].group !== 'SceneLink') {
-                        delete scnDta.assets[assetId];
-                        scnDta.assetIds = scnDta.assetIds.filter((assId) => assetId !== assId);
+                if (!(sceneData.assets[assetId].backendId in backendAssets)) {
+                    if (sceneData.assets[assetId].group !== 'TextCard' && sceneData.assets[assetId].group !== 'SceneLink') {
+                        delete sceneData.assets[assetId];
+                        sceneData.assetIds = sceneData.assetIds.filter((scnDtAssId) => assetId !== scnDtAssId);
 
-                        for (const key in scnDta.assetOrderByGroup) {
-                            if (scnDta.assetOrderByGroup[key as FaderAssetGroupType].includes(assetId)) {
-                                scnDta.assetOrderByGroup[key as FaderAssetGroupType].splice(
-                                    scnDta.assetOrderByGroup[key as FaderAssetGroupType].findIndex((id) => assetId === id),
+                        for (const key in sceneData.assetOrderByGroup) {
+                            if (sceneData.assetOrderByGroup[key as FaderAssetGroupType].includes(assetId)) {
+                                sceneData.assetOrderByGroup[key as FaderAssetGroupType].splice(
+                                    sceneData.assetOrderByGroup[key as FaderAssetGroupType].findIndex((id) => assetId === id),
                                     1
                                 );
 

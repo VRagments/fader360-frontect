@@ -36,7 +36,6 @@ export const FaderScene = (props: FaderSceneProps) => {
                 <Background
                     scene360BackendAssets={scene360BackendAssets}
                     backgroundEnvironment={currentScene.data.environment}
-                    viewMode={viewMode}
                     projectId={currentScene.project_id}
                 />
             )}
