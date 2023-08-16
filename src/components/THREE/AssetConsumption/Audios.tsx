@@ -1,7 +1,6 @@
 import Hls from 'hls.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
-import { handleErr } from '../../../lib/methods/handleErr';
 import { FaderBackendAsset, FaderSceneType } from '../../../types/FaderTypes';
 import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 
@@ -50,38 +49,46 @@ const Audios = (props: AudiosProps) => {
 export default Audios;
 
 export const AudioJsxElement = ({ asset, backendAsset }: AssetJsxElementProps) => {
-    const hls = useRef({ hls: new Hls({debug: false}), audioSource: backendAsset?.static_url });
+    if (!backendAsset || !asset || !Hls.isSupported()) {
+        return <></>;
+    }
+
     const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
+    const isPlaylist = backendAsset.static_url.includes('.m3u8');
+
+    const hlsMemo = useMemo(() => {
+        if (isPlaylist) {
+            return { hls: new Hls({ debug: false }), audioSource: backendAsset?.static_url };
+        }
+    }, [asset, backendAsset]);
+
     useEffect(() => {
-        if (audioRef) {
+        if (audioRef && hlsMemo) {
             /* Once audioRefs have been set:  */
-            hls.current.hls.loadSource(hls.current.audioSource as string);
-            hls.current.hls.attachMedia(audioRef);
+            hlsMemo.hls.loadSource(hlsMemo.audioSource);
+            hlsMemo.hls.attachMedia(audioRef);
 
             // WARN commenting out error-event-catching for now since it leads to "RangeError: Maximum call stack size exceeded at 'Hls.trigger'" errors. Should be fixed in an upcoming HLS update, see https://github.com/video-dev/hls.js/pull/5549
             // hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
             //     handleErr(event, data);
             // });
         }
-    }, [audioRef]);
+    }, [audioRef, hlsMemo]);
 
-    if (!backendAsset || !asset || !Hls.isSupported()) {
-        return <></>;
-    } else {
-        return (
-            <audio
-                /* set reference to element via setAudioRef callback: */
-                ref={setAudioRef}
-                className='block h-fit w-fit'
-                controls
-                autoPlay={asset.data.autoPlay}
-                loop={asset.data.loop}
-                preload='auto'
-                style={{ width: `260px`, height: `30px` }}
-            >
-                Your browser does not support the audio element.
-            </audio>
-        );
-    }
+    return (
+        <audio
+            /* set reference to element via setAudioRef callback: */
+            ref={setAudioRef}
+            className='block h-fit w-fit'
+            controls
+            autoPlay={asset.data.autoPlay}
+            loop={asset.data.loop}
+            preload='auto'
+            style={{ width: `260px`, height: `30px` }}
+            src={isPlaylist ? undefined : backendAsset.static_url}
+        >
+            Your browser does not support the audio element.
+        </audio>
+    );
 };

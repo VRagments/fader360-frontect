@@ -1,6 +1,6 @@
 import { useControls, folder, button } from 'leva';
 import { Schema, StoreType } from 'leva/dist/declarations/src/types';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     wrappers_DeleteAssetFromSceneStoreAndRemote,
     wrappers_SetStoryToStoreAndRemote,
@@ -9,7 +9,7 @@ import {
 } from '../api_and_store_wrappers';
 import { backgroundSphereGeometryArgs } from '../defaults';
 import useZustand from '../zustand/zustand';
-import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType, FaderAssetGroupType } from '../../types/FaderTypes';
+import { FaderBackendAsset, FaderSceneType, FaderSceneAssetType, FaderAssetGroupType, FaderAssetType } from '../../types/FaderTypes';
 import { getBackendAssetsFromStoryAssetsByGroupType, getSortedBackendAssetsByType, setSceneOrderOfScene } from '../methods/faderHelpers';
 import { groupAndTypeLinks } from '../createAsset';
 
@@ -20,13 +20,50 @@ type UseControlsWrapperAssetPropertiesParams = {
     store?: StoreType;
     scene: FaderSceneType;
 };
+
 export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAssetPropertiesParams) => {
-    /** Instead of using setState and syncing to remote in a useEffect, the passed-in Refs are mutated (as they are 'watched'/synced in <Asset>) */
     const { asset, assetPropertiesState, assetDataState, store, scene } = params;
     const [assetData, setAssetData] = assetDataState;
     const [assetProperties, setAssetProperties] = assetPropertiesState;
 
     const faderScenes = useZustand((state) => state.fader.faderScenes);
+    const backendAssets = useZustand((state) => state.fader.faderStoryBackendAssets);
+
+    const replaceAssetCb = useCallback(
+        (type: FaderAssetType) => {
+            const filteredBackendAssets = { ...backendAssets };
+
+            /* Filter non-ready Assets, such as placeholders: */
+            Object.values(backendAssets).forEach((bckAss) => {
+                if (bckAss.status !== 'ready') {
+                    delete filteredBackendAssets[bckAss.id];
+                } else if (asset.backendId === bckAss.id) {
+                    delete filteredBackendAssets[bckAss.id];
+                }
+            });
+
+            const filteredAssetsByType = generateRecordOfNamedBackendAssetIds({
+                ...getSortedBackendAssetsByType(filteredBackendAssets)[type],
+            });
+
+            filteredAssetsByType['(Keep Current Asset)'] = asset.backendId;
+
+            return filteredAssetsByType;
+        },
+        [backendAssets]
+    );
+
+    /* Listen for Changes regarding Template-Placeholder switches: */
+    const [newBackendAssetId, setNewBackendAssetId] = useState<FaderBackendAsset['id']>();
+    useEffect(() => {
+        if (newBackendAssetId) {
+            const updatedAsset = { ...scene.data.assets[asset.id], backendId: newBackendAssetId };
+            updatedAsset.data = { ...updatedAsset.data, name: backendAssets[newBackendAssetId].name };
+
+            const updatedScene = { ...scene, data: { ...scene.data, assets: { ...scene.data.assets, [asset.id]: updatedAsset } } };
+            wrappers_UpdateSceneInLocalAndRemote(updatedScene);
+        }
+    }, [newBackendAssetId, setNewBackendAssetId]);
 
     const sceneLinkOptions = useMemo(() => {
         if (faderScenes && scene) {
@@ -354,7 +391,23 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
         // @ts-expect-error ...
         'Content': folder(contentControls, { order: 0, collapsed: false }),
 
-        // 'SceneLink': folder(sceneLinkControls, { order: 1, collapsed: true }),
+        'Replace Asset': folder(
+            {
+                newAsset: {
+                    label: `${asset.type} Assets`,
+                    options: replaceAssetCb(asset.type),
+                    value: replaceAssetCb(asset.type)['(Keep Current Asset)'],
+                    onChange: (value: FaderBackendAsset['id'], _path: string, { initial }) => {
+                        if (!initial) {
+                            setNewBackendAssetId(value);
+                        }
+                    },
+                    transient: false,
+                    disabled: Object.keys(replaceAssetCb(asset.type)).length > 1 ? false : true,
+                },
+            },
+            { order: 1, collapsed: backendAssets[asset.backendId].status !== 'ready' ? false : true }
+        ),
 
         'Display': folder(displayControls, { order: 2, collapsed: false }),
 
@@ -375,7 +428,7 @@ export const useControlsWrapperAssetProperties = (params: UseControlsWrapperAsse
                     { disabled: false }
                 ),
             },
-            { order: 4, collapsed: true }
+            { order: 4, collapsed: false }
         ),
     };
 
@@ -387,7 +440,6 @@ const backgroundSphereRadius = backgroundSphereGeometryArgs[0];
 export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSceneType) => {
     const faderStory = useZustand((state) => state.fader.faderStory);
 
-
     const faderScenesOrder = faderStory!.data.sceneOrder;
     const currentScenePlaceInSceneOrder = faderScenesOrder.findIndex((sceneId) => sceneId === scene.id);
     if (currentScenePlaceInSceneOrder === -1) {
@@ -396,14 +448,27 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
 
     const backendAssets = useZustand((state) => state.fader.faderStoryBackendAssets);
 
-    const namedEnvironmentBackendAssetIdRecord = useMemo(
-        () =>
-            generateRecordOfNamedBackendAssetIds({
-                ...getSortedBackendAssetsByType(backendAssets)['Video'],
-                ...getSortedBackendAssetsByType(backendAssets)['Image'],
-            }),
-        [backendAssets]
-    );
+    const namedEnvironmentBackendAssetIdRecord = useMemo(() => {
+        const filteredBackendAssets = { ...backendAssets };
+
+        /* Filter non-ready Assets, such as placeholders: */
+        Object.values(backendAssets).forEach((bckAss) => {
+            if (bckAss.status !== 'ready') {
+                delete filteredBackendAssets[bckAss.id];
+            } else if (scene.data.environment.preset === bckAss.id) {
+                delete filteredBackendAssets[bckAss.id];
+            }
+        });
+
+        const filteredNameRecord = generateRecordOfNamedBackendAssetIds({
+            ...getSortedBackendAssetsByType(filteredBackendAssets)['Video'],
+            ...getSortedBackendAssetsByType(filteredBackendAssets)['Image'],
+        });
+
+        filteredNameRecord['(Keep Current Asset)'] = scene.data.environment.preset;
+
+        return filteredNameRecord;
+    }, [backendAssets, scene]);
 
     /* Get the absolute longest duration of an Asset attached to Scene: */
     const longestAudioAndVideoAssetDuration = useMemo(() => {
@@ -550,16 +615,16 @@ export const useControlsWrapperSceneOptions = (store: StoreType, scene: FaderSce
             Background: folder(
                 {
                     backgroundSelect: {
-                        label: 'Available 360 Backgrounds',
+                        label: 'Available Backgrounds',
                         options: namedEnvironmentBackendAssetIdRecord,
-                        value: backgroundSelectValue,
+                        value: namedEnvironmentBackendAssetIdRecord['(Keep Current Asset)'],
                         onChange: (value: FaderBackendAsset['id'], _path: string, { initial }) => {
                             if (!initial) {
                                 setBackgroundSelectValue(value);
-
                             }
                         },
                         transient: false,
+                        disabled: Object.keys(namedEnvironmentBackendAssetIdRecord).length > 1 ? false : true,
                     },
                     enableGround: {
                         label: 'Enable Ground',

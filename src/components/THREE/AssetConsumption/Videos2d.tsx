@@ -1,7 +1,7 @@
 import { FaderBackendAsset, FaderSceneType, FaderVideoSubtitlesType } from '../../../types/FaderTypes';
 import AssetWrapper, { AssetJsxElementProps } from './AssetWrapper';
 import Hls from 'hls.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { wrappers_UpdateSceneInLocalAndRemote } from '../../../lib/api_and_store_wrappers';
 import { api_ListAssetSubtitles, api_ListPublicAssetSubtitles } from '../../../lib/axios';
 import { cloneDeep } from 'lodash';
@@ -28,7 +28,7 @@ const Videos2d = (props: Videos2dProps) => {
                     if (viewMode) {
                         api_ListPublicAssetSubtitles(scene.project_id, videoBackendAsset.id)
                             .then((subtitles) => {
-                                videoAsset.data.subtitles = subtitles;
+                                videoAsset.data = { ...videoAsset.data, subtitles };
                             })
                             .catch((e) => {
                                 handleErr(e);
@@ -36,7 +36,7 @@ const Videos2d = (props: Videos2dProps) => {
                     } else {
                         api_ListAssetSubtitles(videoBackendAsset.id)
                             .then((subtitles) => {
-                                videoAsset.data.subtitles = subtitles;
+                                videoAsset.data = { ...videoAsset.data, subtitles };
                             })
                             .catch((e) => {
                                 handleErr(e);
@@ -86,20 +86,27 @@ export const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementProps)
     }, [asset]);
 
     const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
-    const hls = useRef({ hls: new Hls({debug: false}), videoSource: backendAsset.static_url });
+
+    const isPlaylist = backendAsset.static_url.includes('.m3u8');
+
+    const hlsMemo = useMemo(() => {
+        if (isPlaylist) {
+            return { hls: new Hls({ debug: false }), videoSource: backendAsset.static_url };
+        }
+    }, [asset, backendAsset]);
 
     useEffect(() => {
-        if (videoRef) {
+        if (videoRef && hlsMemo) {
             /* Once videoRefs have been set:  */
-            hls.current.hls.loadSource(hls.current.videoSource);
-            hls.current.hls.attachMedia(videoRef);
+            hlsMemo.hls.loadSource(hlsMemo.videoSource);
+            hlsMemo.hls.attachMedia(videoRef);
 
             // WARN commenting out error-event-catching for now since it leads to "RangeError: Maximum call stack size exceeded at 'Hls.trigger'" errors. Should be fixed in an upcoming HLS update, see https://github.com/video-dev/hls.js/pull/5549
             // hls.current.hls.on(Hls.Events.ERROR, (event, data) => {
             //     handleErr(event, data);
             // });
         }
-    }, [videoRef]);
+    }, [videoRef, hlsMemo]);
 
     return (
         <video
@@ -113,6 +120,7 @@ export const Video2dJsxElement = ({ asset, backendAsset }: AssetJsxElementProps)
             disablePictureInPicture
             className='min-w-full'
             poster={backendAsset.preview_image as string}
+            src={isPlaylist ? undefined : backendAsset.static_url}
         >
             Your device does not support this form of video playback!
             {vttSubs &&
