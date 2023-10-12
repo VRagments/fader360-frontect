@@ -28,8 +28,10 @@ export const api_ListProjectScenes = async (project_id: string) => {
 
 /** GETs all FaderBackendAssets linked to a Project/FaderStory */
 export const api_ListBackendAssetsAssociatedWithProject = async (project_id: string) => {
+    const params = new URLSearchParams([['all', "true"]]);
+
     return await api
-        .get(`/projects/${project_id}/assets`)
+        .get(`/projects/${project_id}/assets`, { params })
         .then((result: AxiosResponse<ApiListResponse<FaderBackendAsset>>) => {
             return result.data.objects;
         })
